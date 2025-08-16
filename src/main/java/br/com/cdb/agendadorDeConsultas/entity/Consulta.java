@@ -16,20 +16,54 @@ public class Consulta {
     @GeneratedValue
     private UUID id;
 
+    private String doctorName;
+
+    private String patientName;
+
+    private String PatientNumber;
+
     private String title;
 
     private String description;
 
     private Date dataConsulta;
 
-    public Consulta(UUID id, String title, String description, Date dataConsulta) {
+    public Consulta(UUID id,String PatientNumber, String doctorName,String patientName, String title, String description, Date dataConsulta) {
         this.id = id;
+        this.doctorName = doctorName;
+        this.patientName = patientName;
+        this.PatientNumber = PatientNumber;
         this.title = title;
         this.description = description;
         this.dataConsulta = dataConsulta;
+
     }
     public  Consulta(){
 
+    }
+
+    public String getPatientNumber() {
+        return PatientNumber;
+    }
+
+    public void setPatientNumber(String patientNumber) {
+        PatientNumber = patientNumber;
+    }
+
+    public String getDoctorName() {
+        return doctorName;
+    }
+
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
     }
 
     public UUID getId() {
