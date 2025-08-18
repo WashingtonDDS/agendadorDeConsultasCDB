@@ -1,11 +1,9 @@
 package br.com.cdb.agendadorDeConsultas.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Table(name = "consulta")
@@ -16,26 +14,34 @@ public class Consulta {
     @GeneratedValue
     private UUID id;
 
+
+    @Column(name = "doctorname", nullable = false)
     private String doctorName;
 
+    @Column(name = "patientname")
     private String patientName;
 
-    private String PatientNumber;
+    @Column(name = "patientnumber")
+    private String patientNumber;
 
-    private String title;
+    @Column(name = "speciality")
+    private String speciality;
 
+    @Column(name = "description")
     private String description;
 
-    private Date dataConsulta;
+    @Column(name = "consultationdatetime")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    private LocalDateTime consultationDateTime;
 
-    public Consulta(UUID id,String PatientNumber, String doctorName,String patientName, String title, String description, Date dataConsulta) {
+    public Consulta(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description, LocalDateTime  dataConsulta) {
         this.id = id;
         this.doctorName = doctorName;
         this.patientName = patientName;
-        this.PatientNumber = PatientNumber;
-        this.title = title;
+        this.patientNumber = patientNumber;
+        this.speciality = speciality;
         this.description = description;
-        this.dataConsulta = dataConsulta;
+        this.consultationDateTime = dataConsulta;
 
     }
     public  Consulta(){
@@ -43,11 +49,11 @@ public class Consulta {
     }
 
     public String getPatientNumber() {
-        return PatientNumber;
+        return patientNumber;
     }
 
-    public void setPatientNumber(String patientNumber) {
-        PatientNumber = patientNumber;
+    public void setpatientNumber(String patientNumber) {
+        this.patientNumber = patientNumber;
     }
 
     public String getDoctorName() {
@@ -74,12 +80,12 @@ public class Consulta {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getSpeciality() {
+        return speciality;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setSpeciality(String speciality) {
+        this.speciality = speciality;
     }
 
     public String getDescription() {
@@ -90,11 +96,11 @@ public class Consulta {
         this.description = description;
     }
 
-    public Date getDataConsulta() {
-        return dataConsulta;
+    public LocalDateTime getConsultationDateTime() {
+        return consultationDateTime;
     }
 
-    public void setDataConsulta(Date dataConsulta) {
-        this.dataConsulta = dataConsulta;
+    public void setConsultationDateTime(LocalDateTime consultationDateTime) {
+        this.consultationDateTime = consultationDateTime;
     }
 }
