@@ -1,5 +1,6 @@
 package br.com.cdb.agendadorDeConsultas.service;
 
+import br.com.cdb.agendadorDeConsultas.dto.ConsultaDetailsDTO;
 import br.com.cdb.agendadorDeConsultas.dto.ConsultaRequestDTO;
 import br.com.cdb.agendadorDeConsultas.dto.ConsultaResponseDTO;
 import br.com.cdb.agendadorDeConsultas.entity.Consulta;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ConsultaService {
@@ -59,6 +61,21 @@ public class ConsultaService {
                         consulta.getDescription(),
                         consulta.getConsultationDateTime()))
                 .toList();
+    }
+
+    public ConsultaDetailsDTO getConsultaDetails(@RequestParam("id") UUID id) {
+        Consulta consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Consulta not found"));
+
+        return new ConsultaDetailsDTO(
+                consulta.getId(),
+                consulta.getDoctorName(),
+                consulta.getPatientName(),
+                consulta.getPatientNumber(),
+                consulta.getSpeciality(),
+                consulta.getDescription(),
+                consulta.getConsultationDateTime()
+        );
     }
 
 

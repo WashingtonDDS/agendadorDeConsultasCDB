@@ -1,5 +1,6 @@
 package br.com.cdb.agendadorDeConsultas.controller;
 
+import br.com.cdb.agendadorDeConsultas.dto.ConsultaDetailsDTO;
 import br.com.cdb.agendadorDeConsultas.dto.ConsultaRequestDTO;
 import br.com.cdb.agendadorDeConsultas.dto.ConsultaResponseDTO;
 import br.com.cdb.agendadorDeConsultas.entity.Consulta;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/consultas")
@@ -35,5 +37,11 @@ public class ConsultaController {
         List<ConsultaResponseDTO> allUpcomingConsultas = this.consultaService.getUpcomingConsultas();
         return ResponseEntity.ok(allUpcomingConsultas);
 
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsultaDetailsDTO> getConsultaDetails(@PathVariable UUID id) {
+        ConsultaDetailsDTO consulta = this.consultaService.getConsultaDetails(id);
+        return ResponseEntity.ok(consulta);
     }
 }
