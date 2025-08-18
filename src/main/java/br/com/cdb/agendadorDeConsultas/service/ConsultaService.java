@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -35,6 +36,20 @@ public class ConsultaService {
     public List<ConsultaResponseDTO> getConsultas(){
         List<Consulta> consultas = consultaRepository.findAll();
         return consultas.stream()
+                .map(consulta -> new ConsultaResponseDTO(
+                        consulta.getId(),
+                        consulta.getDoctorName(),
+                        consulta.getPatientName(),
+                        consulta.getPatientNumber(),
+                        consulta.getSpeciality(),
+                        consulta.getDescription(),
+                        consulta.getConsultationDateTime()))
+                .toList();
+    }
+
+    public List<ConsultaResponseDTO> getUpcomingConsultas() {
+        List<Consulta> upcomingConsultas = consultaRepository.findUpcomingConsultas(LocalDateTime.now());
+        return upcomingConsultas.stream()
                 .map(consulta -> new ConsultaResponseDTO(
                         consulta.getId(),
                         consulta.getDoctorName(),

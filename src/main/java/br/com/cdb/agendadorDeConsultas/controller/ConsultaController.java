@@ -29,4 +29,11 @@ public class ConsultaController {
         return ResponseEntity.ok(allConsultas);
 
     }
+
+    @GetMapping("/proximas")
+    public ResponseEntity<List<ConsultaResponseDTO>> getUpcomingConsultas(){
+        List<ConsultaResponseDTO> allUpcomingConsultas = this.consultaService.getUpcomingConsultas();
+        return ResponseEntity.ok(allUpcomingConsultas);
+
+    }
 }
