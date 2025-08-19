@@ -3,6 +3,7 @@ package br.com.cdb.agendadorDeConsultas.service;
 import br.com.cdb.agendadorDeConsultas.dto.ConsultaDetailsDTO;
 import br.com.cdb.agendadorDeConsultas.dto.ConsultaRequestDTO;
 import br.com.cdb.agendadorDeConsultas.dto.ConsultaResponseDTO;
+import br.com.cdb.agendadorDeConsultas.dto.ConsultaUpdateDTO;
 import br.com.cdb.agendadorDeConsultas.entity.Consulta;
 import br.com.cdb.agendadorDeConsultas.repositories.ConsultaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,31 @@ public class ConsultaService {
                 consulta.getDescription(),
                 consulta.getConsultationDateTime()
         );
+    }
+
+    public Consulta updateConsulta( UUID id, ConsultaUpdateDTO request) {
+        Consulta consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Consulta not found"));
+
+        if (request.doctorName() != null) {
+            consulta.setDoctorName(request.doctorName());
+        }
+        if (request.patientName() != null) {
+            consulta.setPatientName(request.patientName());
+        }
+        if (request.patientNumber() != null) {
+            consulta.setpatientNumber(request.patientNumber());
+        }
+        if (request.consultationDateTime() != null) {
+            consulta.setConsultationDateTime(request.consultationDateTime());
+        }
+
+        return consultaRepository.save(consulta);
+    }
+    public void deleteConsulta(UUID id) {
+        Consulta consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Consulta not found"));
+        consultaRepository.delete(consulta);
     }
 
 
