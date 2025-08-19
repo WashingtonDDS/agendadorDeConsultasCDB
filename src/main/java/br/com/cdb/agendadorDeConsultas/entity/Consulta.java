@@ -52,7 +52,7 @@ public class Consulta {
         return patientNumber;
     }
 
-    public void setpatientNumber(String patientNumber) {
+    public void setPatientNumber(String patientNumber) {
         this.patientNumber = patientNumber;
     }
 

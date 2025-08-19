@@ -1,9 +1,6 @@
 package br.com.cdb.agendadorDeConsultas.service;
 
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaDetailsDTO;
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaRequestDTO;
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaResponseDTO;
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaUpdateDTO;
+import br.com.cdb.agendadorDeConsultas.dto.*;
 import br.com.cdb.agendadorDeConsultas.entity.Consulta;
 import br.com.cdb.agendadorDeConsultas.repositories.ConsultaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +23,7 @@ public class ConsultaService {
         Consulta newConsulta = new Consulta();
         newConsulta.setDoctorName(data.doctorName());
         newConsulta.setPatientName(data.patientName());
-        newConsulta.setpatientNumber(data.patientNumber());
+        newConsulta.setPatientNumber(data.patientNumber());
         newConsulta.setSpeciality(data.speciality());
         newConsulta.setDescription(data.description());
         newConsulta.setConsultationDateTime(data.consultationDateTime());
@@ -90,11 +87,20 @@ public class ConsultaService {
             consulta.setPatientName(request.patientName());
         }
         if (request.patientNumber() != null) {
-            consulta.setpatientNumber(request.patientNumber());
+            consulta.setPatientNumber(request.patientNumber());
         }
         if (request.consultationDateTime() != null) {
             consulta.setConsultationDateTime(request.consultationDateTime());
         }
+
+        return consultaRepository.save(consulta);
+    }
+
+    public Consulta canceledConsulta(UUID id,ConsultaCanceledDTO request) {
+        Consulta consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Consulta not found"));
+
+        consulta.setConsultationDateTime("CANCELADO A CONSULTA");
 
         return consultaRepository.save(consulta);
     }
