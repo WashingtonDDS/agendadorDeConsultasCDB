@@ -30,17 +30,21 @@ public class Consulta {
     @Column(name = "description")
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    private StatusConsulta status = StatusConsulta.AGENDADA;
+
     @Column(name = "consultationdatetime")
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime consultationDateTime;
 
-    public Consulta(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description, LocalDateTime  dataConsulta) {
+    public Consulta(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description,StatusConsulta status, LocalDateTime  dataConsulta) {
         this.id = id;
         this.doctorName = doctorName;
         this.patientName = patientName;
         this.patientNumber = patientNumber;
         this.speciality = speciality;
         this.description = description;
+        this.status = status;
         this.consultationDateTime = dataConsulta;
 
     }
@@ -95,6 +99,10 @@ public class Consulta {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public StatusConsulta getStatus() { return status; }
+
+    public void setStatus(StatusConsulta status) { this.status = status; }
 
     public LocalDateTime getConsultationDateTime() {
         return consultationDateTime;

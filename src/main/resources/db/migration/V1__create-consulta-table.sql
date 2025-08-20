@@ -7,5 +7,6 @@ CREATE TABLE consulta (
     patientNumber VARCHAR(20) NOT NULL,
     speciality VARCHAR(100) NOT NULL,
     description VARCHAR(300) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'AGENDADA',
     consultationDateTime TIMESTAMP NOT NULL
 );

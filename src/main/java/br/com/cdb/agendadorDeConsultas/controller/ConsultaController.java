@@ -55,6 +55,13 @@ public class ConsultaController {
         return ResponseEntity.ok(new ConsultaResponseDTO(updatedConsulta));
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Consulta>cancelledConsulta(
+            @PathVariable UUID id) {
+        Consulta cancelledConsulta = consultaService.canceledConsulta(id);
+        return ResponseEntity.ok(cancelledConsulta);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteConsulta(@PathVariable UUID id) {
         consultaService.deleteConsulta(id);

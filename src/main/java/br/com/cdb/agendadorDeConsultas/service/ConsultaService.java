@@ -2,9 +2,9 @@ package br.com.cdb.agendadorDeConsultas.service;
 
 import br.com.cdb.agendadorDeConsultas.dto.*;
 import br.com.cdb.agendadorDeConsultas.entity.Consulta;
+import br.com.cdb.agendadorDeConsultas.entity.StatusConsulta;
 import br.com.cdb.agendadorDeConsultas.repositories.ConsultaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -43,6 +43,7 @@ public class ConsultaService {
                         consulta.getPatientNumber(),
                         consulta.getSpeciality(),
                         consulta.getDescription(),
+                        consulta.getStatus(),
                         consulta.getConsultationDateTime()))
                 .toList();
     }
@@ -50,6 +51,7 @@ public class ConsultaService {
     public List<ConsultaResponseDTO> getUpcomingConsultas() {
         List<Consulta> upcomingConsultas = consultaRepository.findUpcomingConsultas(LocalDateTime.now());
         return upcomingConsultas.stream()
+                .filter(consulta -> consulta.getStatus() != StatusConsulta.CANCELADA)
                 .map(consulta -> new ConsultaResponseDTO(
                         consulta.getId(),
                         consulta.getDoctorName(),
@@ -57,6 +59,7 @@ public class ConsultaService {
                         consulta.getPatientNumber(),
                         consulta.getSpeciality(),
                         consulta.getDescription(),
+                        consulta.getStatus(),
                         consulta.getConsultationDateTime()))
                 .toList();
     }
@@ -96,11 +99,11 @@ public class ConsultaService {
         return consultaRepository.save(consulta);
     }
 
-    public Consulta canceledConsulta(UUID id,ConsultaCanceledDTO request) {
+    public Consulta canceledConsulta(UUID id) {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
-        consulta.setConsultationDateTime("CANCELADO A CONSULTA");
+        consulta.setStatus(StatusConsulta.CANCELADA);
 
         return consultaRepository.save(consulta);
     }
