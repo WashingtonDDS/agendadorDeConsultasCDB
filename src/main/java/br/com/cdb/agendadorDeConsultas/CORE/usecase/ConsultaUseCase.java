@@ -100,7 +100,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
             consulta.setConsultationDateTime(request.consultationDateTime());
         }
 
-        return consultainputPort.save(consulta);
+        return consultaOutputPort.save(consulta);
     }
 
     public Consulta canceledConsulta(UUID id) {
@@ -109,12 +109,12 @@ public class ConsultaUseCase implements ConsultaInputPort {
 
         consulta.setStatus(StatusConsulta.CANCELADA);
 
-        return consultainputPort.save(consulta);
+        return consultaOutputPort.save(consulta);
     }
     public void deleteConsulta(UUID id) {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
-        consultainputPort.delete(consulta);
+        consultaOutputPort.delete(consulta);
     }
 
 
