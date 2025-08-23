@@ -1,15 +1,16 @@
 package br.com.cdb.agendadorDeConsultas.adapter.output.repositories;
 
-import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.time.LocalDateTime;
+import br.com.cdb.agendadorDeConsultas.adapter.output.entity.ConsultaEntity;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-public interface ConsultaRepository extends JpaRepository<Consulta, UUID> {
-    @Query("SELECT e FROM Consulta e WHERE e.consultationDateTime >= :currentDate")
-    public List<Consulta> findUpcomingConsultas(@Param("currentDate") LocalDateTime currentDate);
+public interface ConsultaRepository {
+    ConsultaEntity save(ConsultaEntity consultaEntity);
+
+    Optional<ConsultaEntity> findById(UUID uuid);
+
+    List<ConsultaEntity> findAll();
+
+    void deleteById(UUID uuid);
 }
