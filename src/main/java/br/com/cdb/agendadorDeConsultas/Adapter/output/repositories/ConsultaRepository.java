@@ -6,11 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ConsultaRepository {
-    ConsultaEntity save(ConsultaEntity consultaEntity);
 
-    Optional<ConsultaEntity> findById(UUID uuid);
 
-    List<ConsultaEntity> findAll();
-
-    void deleteById(UUID uuid);
 }
