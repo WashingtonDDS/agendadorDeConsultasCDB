@@ -30,21 +30,21 @@ public class ConsultaController {
 
     @GetMapping
     public ResponseEntity<List<ConsultaResponseDTO>> getAllConsultas(){
-        List<ConsultaResponseDTO> allConsultas = this.consultaService.getConsultas();
+        List<ConsultaResponseDTO> allConsultas = consultainputPort.getConsultas();
         return ResponseEntity.ok(allConsultas);
 
     }
 
     @GetMapping("/proximas")
     public ResponseEntity<List<ConsultaResponseDTO>> getUpcomingConsultas(){
-        List<ConsultaResponseDTO> allUpcomingConsultas = this.consultaService.getUpcomingConsultas();
+        List<ConsultaResponseDTO> allUpcomingConsultas = consultainputPort.getUpcomingConsultas();
         return ResponseEntity.ok(allUpcomingConsultas);
 
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ConsultaDetailsDTO> getConsultaDetails(@PathVariable UUID id) {
-        ConsultaDetailsDTO consulta = this.consultaService.getConsultaDetails(id);
+        ConsultaDetailsDTO consulta = consultainputPort.getConsultaDetails(id);
         return ResponseEntity.ok(consulta);
     }
     @PutMapping("/{id}")
@@ -52,20 +52,20 @@ public class ConsultaController {
             @PathVariable UUID id,
             @RequestBody ConsultaUpdateDTO request) {
 
-        Consulta updatedConsulta = consultaService.updateConsulta(id, request);
+        Consulta updatedConsulta = consultainputPort.updateConsulta(id, request);
         return ResponseEntity.ok(new ConsultaResponseDTO(updatedConsulta));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Consulta>cancelledConsulta(
             @PathVariable UUID id) {
-        Consulta cancelledConsulta = consultaService.canceledConsulta(id);
+        Consulta cancelledConsulta = consultainputPort.canceledConsulta(id);
         return ResponseEntity.ok(cancelledConsulta);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteConsulta(@PathVariable UUID id) {
-        consultaService.deleteConsulta(id);
+        consultainputPort.deleteConsulta(id);
         return ResponseEntity.noContent().build();
     }
 }
