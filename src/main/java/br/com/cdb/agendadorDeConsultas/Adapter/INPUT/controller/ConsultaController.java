@@ -1,11 +1,11 @@
-package br.com.cdb.agendadorDeConsultas.controller;
+package br.com.cdb.agendadorDeConsultas.adapter.input.controller;
 
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaDetailsDTO;
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaRequestDTO;
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaResponseDTO;
-import br.com.cdb.agendadorDeConsultas.dto.ConsultaUpdateDTO;
-import br.com.cdb.agendadorDeConsultas.entity.Consulta;
-import br.com.cdb.agendadorDeConsultas.service.ConsultaService;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequestDTO;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaResponseDTO;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaDetailsDTO;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdateDTO;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
+import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +18,13 @@ import java.util.UUID;
 public class ConsultaController {
 
     @Autowired
-    private ConsultaService consultaService;
+
+    private ConsultaInputPort consultainputPort;
 
 
     @PostMapping
     public ResponseEntity<Consulta> create(@RequestBody ConsultaRequestDTO body){
-        Consulta newConsulta = this.consultaService.createConsulta(body);
+        Consulta newConsulta = consultainputPort.createConsulta(body);
         return ResponseEntity.ok(newConsulta);
     }
 

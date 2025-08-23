@@ -1,4 +1,5 @@
-package br.com.cdb.agendadorDeConsultas.dto;
+package br.com.cdb.agendadorDeConsultas.adapter.input.request;
+
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

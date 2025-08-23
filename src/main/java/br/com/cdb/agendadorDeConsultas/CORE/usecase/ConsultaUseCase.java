@@ -1,9 +1,12 @@
-package br.com.cdb.agendadorDeConsultas.service;
-
-import br.com.cdb.agendadorDeConsultas.dto.*;
-import br.com.cdb.agendadorDeConsultas.entity.Consulta;
-import br.com.cdb.agendadorDeConsultas.entity.StatusConsulta;
-import br.com.cdb.agendadorDeConsultas.repositories.ConsultaRepository;
+package br.com.cdb.agendadorDeConsultas.core.usecase;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequestDTO;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaResponseDTO;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaDetailsDTO;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdateDTO;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
+import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
+import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,10 +16,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class ConsultaService {
+public class ConsultaUseCase implements ConsultaInputPort {
 
     @Autowired
-    private ConsultaRepository consultaRepository;
+    private ConsultaOutputPort consultaOutputPort;
+
 
     public Consulta createConsulta(ConsultaRequestDTO data){
 
@@ -28,7 +32,7 @@ public class ConsultaService {
         newConsulta.setDescription(data.description());
         newConsulta.setConsultationDateTime(data.consultationDateTime());
 
-        consultaRepository.save(newConsulta);
+        consultaOutputPort.save(newConsulta);
 
         return newConsulta;
     }
@@ -96,7 +100,7 @@ public class ConsultaService {
             consulta.setConsultationDateTime(request.consultationDateTime());
         }
 
-        return consultaRepository.save(consulta);
+        return consultainputPort.save(consulta);
     }
 
     public Consulta canceledConsulta(UUID id) {
@@ -105,12 +109,12 @@ public class ConsultaService {
 
         consulta.setStatus(StatusConsulta.CANCELADA);
 
-        return consultaRepository.save(consulta);
+        return consultainputPort.save(consulta);
     }
     public void deleteConsulta(UUID id) {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
-        consultaRepository.delete(consulta);
+        consultainputPort.delete(consulta);
     }
 
 

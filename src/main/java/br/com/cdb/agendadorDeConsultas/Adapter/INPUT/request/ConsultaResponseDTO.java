@@ -1,7 +1,7 @@
-package br.com.cdb.agendadorDeConsultas.dto;
+package br.com.cdb.agendadorDeConsultas.adapter.input.request;
 
-import br.com.cdb.agendadorDeConsultas.entity.Consulta;
-import br.com.cdb.agendadorDeConsultas.entity.StatusConsulta;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;

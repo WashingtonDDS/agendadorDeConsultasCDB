@@ -1,4 +1,4 @@
-package br.com.cdb.agendadorDeConsultas.entity;
+package br.com.cdb.agendadorDeConsultas.core.domain.model;
 
 public enum StatusConsulta {
     AGENDADA,

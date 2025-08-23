@@ -1,6 +1,6 @@
-package br.com.cdb.agendadorDeConsultas.repositories;
+package br.com.cdb.agendadorDeConsultas.adapter.output.repositories;
 
-import br.com.cdb.agendadorDeConsultas.entity.Consulta;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

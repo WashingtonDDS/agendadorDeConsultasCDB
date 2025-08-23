@@ -1,15 +1,13 @@
-package br.com.cdb.agendadorDeConsultas.entity;
+package br.com.cdb.agendadorDeConsultas.adapter.input.request;
 
+import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Table(name = "consulta")
-@Entity
-
-public class Consulta {
+public class ConsultaRequest {
     @Id
     @GeneratedValue
     private UUID id;
@@ -37,7 +35,7 @@ public class Consulta {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime consultationDateTime;
 
-    public Consulta(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description,StatusConsulta status, LocalDateTime  dataConsulta) {
+    public ConsultaRequest(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description,StatusConsulta status, LocalDateTime  dataConsulta) {
         this.id = id;
         this.doctorName = doctorName;
         this.patientName = patientName;
@@ -48,7 +46,7 @@ public class Consulta {
         this.consultationDateTime = dataConsulta;
 
     }
-    public  Consulta(){
+    public  ConsultaRequest(){
 
     }
 
