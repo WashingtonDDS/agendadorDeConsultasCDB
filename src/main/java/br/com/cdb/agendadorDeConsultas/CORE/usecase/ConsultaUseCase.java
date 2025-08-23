@@ -38,7 +38,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
     }
 
     public List<ConsultaResponseDTO> getConsultas(){
-        List<Consulta> consultas = consultaRepository.findAll();
+        List<Consulta> consultas = consultaOutputPort.findAll();
         return consultas.stream()
                 .map(consulta -> new ConsultaResponseDTO(
                         consulta.getId(),
@@ -53,7 +53,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
     }
 
     public List<ConsultaResponseDTO> getUpcomingConsultas() {
-        List<Consulta> upcomingConsultas = consultaRepository.findUpcomingConsultas(LocalDateTime.now());
+        List<Consulta> upcomingConsultas = consultaOutputPort.findUpcomingConsultas(LocalDateTime.now());
         return upcomingConsultas.stream()
                 .filter(consulta -> consulta.getStatus() != StatusConsulta.CANCELADA)
                 .map(consulta -> new ConsultaResponseDTO(
@@ -69,7 +69,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
     }
 
     public ConsultaDetailsDTO getConsultaDetails(@RequestParam("id") UUID id) {
-        Consulta consulta = consultaRepository.findById(id)
+        Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
         return new ConsultaDetailsDTO(
@@ -84,7 +84,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
     }
 
     public Consulta updateConsulta( UUID id, ConsultaUpdateDTO request) {
-        Consulta consulta = consultaRepository.findById(id)
+        Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
         if (request.doctorName() != null) {
@@ -104,7 +104,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
     }
 
     public Consulta canceledConsulta(UUID id) {
-        Consulta consulta = consultaRepository.findById(id)
+        Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
         consulta.setStatus(StatusConsulta.CANCELADA);
@@ -112,7 +112,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
         return consultaOutputPort.save(consulta);
     }
     public void deleteConsulta(UUID id) {
-        Consulta consulta = consultaRepository.findById(id)
+        Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
         consultaOutputPort.delete(consulta);
     }
