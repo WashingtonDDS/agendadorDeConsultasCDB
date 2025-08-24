@@ -41,7 +41,7 @@ public class ConsultaRepositoryImpl implements ConsultaOutputPort {
             consulta.setId(id);
 
             jdbcTemplate.update(
-                    "INSERT INTO consultas (id, doctorname, patientname, patientnumber, speciality, description, status, consultationdatetime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO consulta (id, doctorname, patientname, patientnumber, speciality, description, status, consultationdatetime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     consulta.getDoctorName(),
                     consulta.getPatientName(),
@@ -53,7 +53,7 @@ public class ConsultaRepositoryImpl implements ConsultaOutputPort {
             );
         } else {
             jdbcTemplate.update(
-                    "UPDATE consultas SET doctorname = ?, patientname = ?, patientnumber = ?, speciality = ?, description = ?, status = ?, consultationdatetime = ? WHERE id = ?",
+                    "UPDATE consulta SET doctorname = ?, patientname = ?, patientnumber = ?, speciality = ?, description = ?, status = ?, consultationdatetime = ? WHERE id = ?",
                     consulta.getDoctorName(),
                     consulta.getPatientName(),
                     consulta.getPatientNumber(),
@@ -67,17 +67,17 @@ public class ConsultaRepositoryImpl implements ConsultaOutputPort {
         return consulta;
     }
     public List<Consulta> findAll() {
-        String sql = "SELECT * FROM consultas";
+        String sql = "SELECT * FROM consulta";
         return jdbcTemplate.query(sql, consultaRowMapper);
     }
 
     public List<Consulta> findUpcomingConsultas(LocalDateTime now) {
-        String sql = "SELECT * FROM consultas WHERE consultationdatetime > ?";
+        String sql = "SELECT * FROM consulta WHERE consultationdatetime > ?";
         return jdbcTemplate.query(sql, consultaRowMapper, now);
     }
 
     public Optional<Consulta> findById(UUID id) {
-        String sql = "SELECT * FROM consultas WHERE id = ?";
+        String sql = "SELECT * FROM consulta WHERE id = ?";
         try {
             Consulta consulta = jdbcTemplate.queryForObject(sql, consultaRowMapper, id);
             return Optional.ofNullable(consulta);
@@ -87,7 +87,7 @@ public class ConsultaRepositoryImpl implements ConsultaOutputPort {
     }
 
     public void delete(Consulta consulta) {
-        String sql = "DELETE FROM consultas WHERE id = ?";
+        String sql = "DELETE FROM consulta WHERE id = ?";
         jdbcTemplate.update(sql, consulta.getId());
     }
 
