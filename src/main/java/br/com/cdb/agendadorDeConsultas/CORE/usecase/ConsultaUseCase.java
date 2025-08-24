@@ -1,7 +1,5 @@
 package br.com.cdb.agendadorDeConsultas.core.usecase;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequestDTO;
-import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaResponseDTO;
-import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaDetailsDTO;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdateDTO;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
@@ -31,56 +29,29 @@ public class ConsultaUseCase implements ConsultaInputPort {
         newConsulta.setSpeciality(data.speciality());
         newConsulta.setDescription(data.description());
         newConsulta.setConsultationDateTime(data.consultationDateTime());
+        newConsulta.setStatus(StatusConsulta.AGENDADA);
 
         consultaOutputPort.save(newConsulta);
 
         return newConsulta;
     }
 
-    public List<ConsultaResponseDTO> getConsultas(){
-        List<Consulta> consultas = consultaOutputPort.findAll();
-        return consultas.stream()
-                .map(consulta -> new ConsultaResponseDTO(
-                        consulta.getId(),
-                        consulta.getDoctorName(),
-                        consulta.getPatientName(),
-                        consulta.getPatientNumber(),
-                        consulta.getSpeciality(),
-                        consulta.getDescription(),
-                        consulta.getStatus(),
-                        consulta.getConsultationDateTime()))
-                .toList();
+    public List<Consulta> getConsultas(){
+        return consultaOutputPort.findAll();
+
     }
 
-    public List<ConsultaResponseDTO> getUpcomingConsultas() {
+    public List<Consulta> getUpcomingConsultas() {
         List<Consulta> upcomingConsultas = consultaOutputPort.findUpcomingConsultas(LocalDateTime.now());
         return upcomingConsultas.stream()
                 .filter(consulta -> consulta.getStatus() != StatusConsulta.CANCELADA)
-                .map(consulta -> new ConsultaResponseDTO(
-                        consulta.getId(),
-                        consulta.getDoctorName(),
-                        consulta.getPatientName(),
-                        consulta.getPatientNumber(),
-                        consulta.getSpeciality(),
-                        consulta.getDescription(),
-                        consulta.getStatus(),
-                        consulta.getConsultationDateTime()))
                 .toList();
     }
 
-    public ConsultaDetailsDTO getConsultaDetails(@RequestParam("id") UUID id) {
-        Consulta consulta = consultaOutputPort.findById(id)
+    public Consulta getConsultaDetails(@RequestParam("id") UUID id) {
+        return consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
-        return new ConsultaDetailsDTO(
-                consulta.getId(),
-                consulta.getDoctorName(),
-                consulta.getPatientName(),
-                consulta.getPatientNumber(),
-                consulta.getSpeciality(),
-                consulta.getDescription(),
-                consulta.getConsultationDateTime()
-        );
     }
 
     public Consulta updateConsulta( UUID id, ConsultaUpdateDTO request) {

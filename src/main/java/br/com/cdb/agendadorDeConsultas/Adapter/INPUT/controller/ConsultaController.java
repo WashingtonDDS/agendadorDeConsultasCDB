@@ -1,5 +1,6 @@
 package br.com.cdb.agendadorDeConsultas.adapter.input.controller;
 
+import br.com.cdb.agendadorDeConsultas.adapter.input.mapper.ConsultaMapper;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequestDTO;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaResponseDTO;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaDetailsDTO;
@@ -12,55 +13,67 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/consultas")
 public class ConsultaController {
 
     @Autowired
-
     private ConsultaInputPort consultainputPort;
+
+    @Autowired
+    private ConsultaMapper consultaMapper;
+
+
 
 
     @PostMapping
-    public ResponseEntity<Consulta> create(@RequestBody ConsultaRequestDTO body){
+    public ResponseEntity<ConsultaResponseDTO> create(@RequestBody ConsultaRequestDTO body){
         Consulta newConsulta = consultainputPort.createConsulta(body);
-        return ResponseEntity.ok(newConsulta);
+        ConsultaResponseDTO responseDTO = consultaMapper.toResponse(newConsulta);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
     public ResponseEntity<List<ConsultaResponseDTO>> getAllConsultas(){
-        List<ConsultaResponseDTO> allConsultas = consultainputPort.getConsultas();
-        return ResponseEntity.ok(allConsultas);
-
+        List<Consulta> consultas = consultainputPort.getConsultas();
+        List<ConsultaResponseDTO> responseDTOs = consultas.stream()
+                .map(consultaMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
+
 
     @GetMapping("/proximas")
     public ResponseEntity<List<ConsultaResponseDTO>> getUpcomingConsultas(){
-        List<ConsultaResponseDTO> allUpcomingConsultas = consultainputPort.getUpcomingConsultas();
-        return ResponseEntity.ok(allUpcomingConsultas);
-
+        List<Consulta> consultas = consultainputPort.getUpcomingConsultas();
+        List<ConsultaResponseDTO> responseDTOs = consultas.stream()
+                .map(consultaMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ConsultaDetailsDTO> getConsultaDetails(@PathVariable UUID id) {
-        ConsultaDetailsDTO consulta = consultainputPort.getConsultaDetails(id);
-        return ResponseEntity.ok(consulta);
+        Consulta consulta = consultainputPort.getConsultaDetails(id);
+        ConsultaDetailsDTO detailsDTO = consultaMapper.toDetails(consulta);
+        return ResponseEntity.ok(detailsDTO);
     }
     @PutMapping("/{id}")
     public ResponseEntity<ConsultaResponseDTO> updateConsulta(
             @PathVariable UUID id,
             @RequestBody ConsultaUpdateDTO request) {
-
         Consulta updatedConsulta = consultainputPort.updateConsulta(id, request);
-        return ResponseEntity.ok(new ConsultaResponseDTO(updatedConsulta));
+        ConsultaResponseDTO responseDTO = consultaMapper.toResponse(updatedConsulta);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Consulta>cancelledConsulta(
-            @PathVariable UUID id) {
+    public ResponseEntity<ConsultaResponseDTO> cancelledConsulta(@PathVariable UUID id) {
         Consulta cancelledConsulta = consultainputPort.canceledConsulta(id);
-        return ResponseEntity.ok(cancelledConsulta);
+        ConsultaResponseDTO responseDTO = consultaMapper.toResponse(cancelledConsulta);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")
