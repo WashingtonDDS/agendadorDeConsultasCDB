@@ -1,40 +1,32 @@
 package br.com.cdb.agendadorDeConsultas.core.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.*;
+
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Table(name = "consulta")
-@Entity
 
 public class Consulta {
-    @Id
-    @GeneratedValue
+
     private UUID id;
 
 
-    @Column(name = "doctorname", nullable = false)
+
     private String doctorName;
 
-    @Column(name = "patientname")
+
     private String patientName;
 
-    @Column(name = "patientnumber")
     private String patientNumber;
 
-    @Column(name = "speciality")
+
     private String speciality;
 
-    @Column(name = "description")
     private String description;
 
-    @Enumerated(EnumType.STRING)
+
     private StatusConsulta status = StatusConsulta.AGENDADA;
 
-    @Column(name = "consultationdatetime")
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime consultationDateTime;
 
     public Consulta(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description,StatusConsulta status, LocalDateTime  dataConsulta) {
