@@ -12,9 +12,9 @@ import java.util.UUID;
 
 public interface ConsultaInputPort {
     public Consulta createConsulta(ConsultaRequestDTO data);
-    public List<ConsultaResponseDTO> getConsultas();
-    public List<ConsultaResponseDTO> getUpcomingConsultas();
-    public ConsultaDetailsDTO getConsultaDetails(@RequestParam("id") UUID id);
+    public List<Consulta> getConsultas();
+    public List<Consulta> getUpcomingConsultas();
+    public Consulta getConsultaDetails(@RequestParam("id") UUID id);
     public Consulta updateConsulta( UUID id, ConsultaUpdateDTO request);
     public Consulta canceledConsulta(UUID id);
     public void deleteConsulta(UUID id);
