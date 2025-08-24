@@ -1,6 +1,6 @@
 
 
-```markdown
+
 # 🩺 Agendador de Consultas
 
 Sistema de agendamento de consultas médicas desenvolvido em **Java + Spring Boot** seguindo a **Arquitetura Hexagonal**.  
@@ -23,11 +23,11 @@ A aplicação permite criar, buscar, atualizar, cancelar e excluir consultas, ga
 - **Beekeeper Studio**
 - **Persistência com JDBC puro (sem JPA/Hibernate)**
 
----
+
 
 ## 📂 Estrutura do Projeto (Arquitetura Hexagonal)
 
-```
+
 
 src/main/java/br/com/cdb/agendadorDeConsultas
 ├── adapter
@@ -40,17 +40,16 @@ src/main/java/br/com/cdb/agendadorDeConsultas
 ├── infrastructure (Configurações)
 └── util (Classes utilitárias)
 
-````
+
 
 ---
 
 ## 🚀 Como Executar
 
 ### 1. Clonar o repositório
-```bash
-git clone https://github.com/WashingtonDDS/agendador-de-consultas.git
-cd agendador-de-consultas
-````
+
+git clone https://github.com/WashingtonDDS/agendadorDeConsultasCDB
+
 
 ### 2. Subir o banco com Docker
 
