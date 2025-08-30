@@ -8,30 +8,23 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class ConsultaEntity {
-    @Id
-    @GeneratedValue
+
     private UUID id;
 
 
-    @Column(name = "doctorname", nullable = false)
     private String doctorName;
 
-    @Column(name = "patientname")
     private String patientName;
 
-    @Column(name = "patientnumber")
     private String patientNumber;
 
-    @Column(name = "speciality")
     private String speciality;
 
-    @Column(name = "description")
     private String description;
 
     @Enumerated(EnumType.STRING)
     private StatusConsulta status = StatusConsulta.AGENDADA;
 
-    @Column(name = "consultationdatetime")
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime consultationDateTime;
 
