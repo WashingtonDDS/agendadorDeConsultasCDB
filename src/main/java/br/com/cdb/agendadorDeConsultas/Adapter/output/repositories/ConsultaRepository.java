@@ -1,6 +1,5 @@
 package br.com.cdb.agendadorDeConsultas.adapter.output.repositories;
 
-import br.com.cdb.agendadorDeConsultas.adapter.output.entity.ConsultaEntity;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
@@ -16,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public class ConsultaRepositoryImpl implements ConsultaOutputPort {
+public class ConsultaRepository implements ConsultaOutputPort {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
