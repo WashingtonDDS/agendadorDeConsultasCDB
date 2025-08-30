@@ -1,6 +1,6 @@
 package br.com.cdb.agendadorDeConsultas.core.usecase;
-import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequestDTO;
-import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdateDTO;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequest;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
@@ -17,7 +17,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
     private ConsultaOutputPort consultaOutputPort;
 
 
-    public Consulta createConsulta(ConsultaRequestDTO data){
+    public Consulta createConsulta(ConsultaRequest data){
 
         Consulta newConsulta = new Consulta();
         newConsulta.setDoctorName(data.doctorName());
@@ -51,7 +51,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
 
     }
 
-    public Consulta updateConsulta( UUID id, ConsultaUpdateDTO request) {
+    public Consulta updateConsulta( UUID id, ConsultaUpdate request) {
         Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
