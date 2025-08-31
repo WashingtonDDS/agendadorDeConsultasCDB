@@ -30,9 +30,9 @@ public class ConsultaController {
 
     @PostMapping
     public ResponseEntity<ConsultaResponse> create(@RequestBody ConsultaRequest body){
-        Consulta newConsulta = consultainputPort.createConsulta(body);
-        ConsultaResponse responseDTO = consultaMapper.toResponse(newConsulta);
-        return ResponseEntity.ok(responseDTO);
+        Consulta consulta = consultaMapper.toDomain(body);
+        Consulta newConsulta = consultainputPort.createConsulta(consulta);
+        return ResponseEntity.ok(consultaMapper.toResponse(newConsulta));
     }
 
     @GetMapping
