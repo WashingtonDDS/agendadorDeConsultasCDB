@@ -1,8 +1,11 @@
 package br.com.cdb.agendadorDeConsultas.adapter.output.repositories;
 
+import br.com.cdb.agendadorDeConsultas.adapter.input.mapper.ConsultaMapper;
+import br.com.cdb.agendadorDeConsultas.adapter.output.entity.ConsultaEntity;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,8 +20,12 @@ import java.util.UUID;
 @Repository
 public class ConsultaRepository implements ConsultaOutputPort {
 
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ConsultaRepository.class);
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private final ConsultaMapper consultaMapper;
 
     private final RowMapper<Consulta> consultaRowMapper = (rs, rowNum) -> {
         Consulta consulta = new Consulta();
@@ -33,44 +40,61 @@ public class ConsultaRepository implements ConsultaOutputPort {
         return consulta;
     };
 
+    public ConsultaRepository(ConsultaMapper consultaMapper) {
+        this.consultaMapper = consultaMapper;
+    }
+
+
     @Override
     public Consulta save(Consulta consulta) {
-        if (consulta.getId() == null) {
+        ConsultaEntity consultaEntity = consultaMapper.toEntity(consulta);
+        if (consultaEntity.getId() == null) {
             UUID id = UUID.randomUUID();
-            consulta.setId(id);
+            consultaEntity.setId(id);
+
+            logger.info("Inserindo nova consulta com id {}", id);
 
             jdbcTemplate.update(
                     "INSERT INTO consulta (id, doctorname, patientname, patientnumber, speciality, description, status, consultationdatetime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
-                    consulta.getDoctorName(),
-                    consulta.getPatientName(),
-                    consulta.getPatientNumber(),
-                    consulta.getSpeciality(),
-                    consulta.getDescription(),
-                    consulta.getStatus().name(),
-                    consulta.getConsultationDateTime()
+                    consultaEntity.getDoctorName(),
+                    consultaEntity.getPatientName(),
+                    consultaEntity.getPatientNumber(),
+                    consultaEntity.getSpeciality(),
+                    consultaEntity.getDescription(),
+                    consultaEntity.getStatus().name(),
+                    consultaEntity.getConsultationDateTime()
             );
         } else {
+
+            logger.info("Atualizando consulta com id {}", consultaEntity.getId());
+
             jdbcTemplate.update(
                     "UPDATE consulta SET doctorname = ?, patientname = ?, patientnumber = ?, speciality = ?, description = ?, status = ?, consultationdatetime = ? WHERE id = ?",
-                    consulta.getDoctorName(),
-                    consulta.getPatientName(),
-                    consulta.getPatientNumber(),
-                    consulta.getSpeciality(),
-                    consulta.getDescription(),
-                    consulta.getStatus().name(),
-                    consulta.getConsultationDateTime(),
-                    consulta.getId()
+                    consultaEntity.getDoctorName(),
+                    consultaEntity.getPatientName(),
+                    consultaEntity.getPatientNumber(),
+                    consultaEntity.getSpeciality(),
+                    consultaEntity.getDescription(),
+                    consultaEntity.getStatus().name(),
+                    consultaEntity.getConsultationDateTime(),
+                    consultaEntity.getId()
             );
         }
-        return consulta;
+        return consultaMapper.toDomainEntity(consultaEntity);
     }
     public List<Consulta> findAll() {
-        String sql = "SELECT * FROM consulta";
+
+        logger.debug("Buscando todas as consultas via fn_BuscarTodasConsultas()");
+
+        String sql = "SELECT * FROM fn_BuscarTodasConsultas()";
         return jdbcTemplate.query(sql, consultaRowMapper);
     }
 
     public List<Consulta> findUpcomingConsultas(LocalDateTime now) {
+
+        logger.debug("Buscando consultas futuras a partir de {}", now);
+
         String sql = "SELECT * FROM consulta WHERE consultationdatetime > ?";
         return jdbcTemplate.query(sql, consultaRowMapper, now);
     }
@@ -78,14 +102,20 @@ public class ConsultaRepository implements ConsultaOutputPort {
     public Optional<Consulta> findById(UUID id) {
         String sql = "SELECT * FROM consulta WHERE id = ?";
         try {
+            logger.debug("Buscando consulta com id {}", id);
+
             Consulta consulta = jdbcTemplate.queryForObject(sql, consultaRowMapper, id);
             return Optional.ofNullable(consulta);
         } catch (EmptyResultDataAccessException e) {
+            logger.warn("Nenhuma consulta encontrada com id {}", id);
+
             return Optional.empty();
         }
     }
 
     public void delete(Consulta consulta) {
+        logger.info("Deletando consulta com id {}", consulta.getId());
+
         String sql = "DELETE FROM consulta WHERE id = ?";
         jdbcTemplate.update(sql, consulta.getId());
     }
