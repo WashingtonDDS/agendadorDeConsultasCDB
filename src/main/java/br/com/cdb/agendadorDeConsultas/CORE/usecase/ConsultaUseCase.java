@@ -1,11 +1,9 @@
 package br.com.cdb.agendadorDeConsultas.core.usecase;
-import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
-import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -14,23 +12,14 @@ import java.util.UUID;
 public class ConsultaUseCase implements ConsultaInputPort {
 
 
-    private ConsultaOutputPort consultaOutputPort;
+    private final ConsultaOutputPort consultaOutputPort;
 
+    public ConsultaUseCase(ConsultaOutputPort consultaOutputPort) {
+        this.consultaOutputPort = consultaOutputPort;
+    }
 
-    public Consulta createConsulta(ConsultaRequest data){
-
-        Consulta newConsulta = new Consulta();
-        newConsulta.setDoctorName(data.doctorName());
-        newConsulta.setPatientName(data.patientName());
-        newConsulta.setPatientNumber(data.patientNumber());
-        newConsulta.setSpeciality(data.speciality());
-        newConsulta.setDescription(data.description());
-        newConsulta.setConsultationDateTime(data.consultationDateTime());
-        newConsulta.setStatus(StatusConsulta.AGENDADA);
-
-        consultaOutputPort.save(newConsulta);
-
-        return newConsulta;
+    public Consulta createConsulta(Consulta consulta){
+        return consultaOutputPort.save(consulta);
     }
 
     public List<Consulta> getConsultas(){
@@ -45,7 +34,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
                 .toList();
     }
 
-    public Consulta getConsultaDetails(@RequestParam("id") UUID id) {
+    public Consulta getConsultaDetails( UUID id) {
         return consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
