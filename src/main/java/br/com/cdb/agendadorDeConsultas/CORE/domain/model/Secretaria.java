@@ -4,15 +4,15 @@ import java.util.UUID;
 
 public class Secretaria {
     private UUID id;
-    private String nome;
+    private String name;
     private String cpf;
     private String email;
     private String password;
 
 
-    public Secretaria(UUID id, String nome, String cpf, String email, String password) {
+    public Secretaria(UUID id, String name, String cpf, String email, String password) {
         this.id = id;
-        this.nome = nome;
+        this.name = name;
         this.cpf = cpf;
         this.email = email;
         this.password = password;
@@ -22,6 +22,11 @@ public class Secretaria {
     public Secretaria(String password) {
 
     }
+
+    public Secretaria() {
+
+    }
+
     public String getPassword() {
         return password;
     }
@@ -41,11 +46,11 @@ public class Secretaria {
     }
 
     public String getNome() {
-        return nome;
+        return name;
     }
 
     public void setNome(String nome) {
-        this.nome = nome;
+        this.name = nome;
     }
 
     public String getCpf() {
