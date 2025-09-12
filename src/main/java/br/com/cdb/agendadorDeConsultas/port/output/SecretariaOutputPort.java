@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface SecretariaOutputPort {
     Secretaria save(Secretaria secretaria);
     List<Secretaria>findAll();
-    Secretaria findById(Long id);
-    void delete(UUID id);
-    Secretaria update(UUID id, Secretaria secretaria);
+    Secretaria findById(UUID id);
+    void delete(Secretaria secretaria);
+
 }
