@@ -55,7 +55,7 @@ public class ConsultaRepository implements ConsultaOutputPort {
             logger.info("Inserindo nova consulta com id {}", id);
 
             jdbcTemplate.update(
-                    "INSERT INTO consulta (id, doctorname, patientname, patientnumber, speciality, description, status, consultationdatetime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "call pr_upsert_consulta(?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     consultaEntity.getDoctorName(),
                     consultaEntity.getPatientName(),
@@ -70,19 +70,21 @@ public class ConsultaRepository implements ConsultaOutputPort {
             logger.info("Atualizando consulta com id {}", consultaEntity.getId());
 
             jdbcTemplate.update(
-                    "UPDATE consulta SET doctorname = ?, patientname = ?, patientnumber = ?, speciality = ?, description = ?, status = ?, consultationdatetime = ? WHERE id = ?",
+                    "call pr_upsert_consulta(?, ?, ?, ?, ?, ?, ?, ?)",
+                    consultaEntity.getId(),
                     consultaEntity.getDoctorName(),
                     consultaEntity.getPatientName(),
                     consultaEntity.getPatientNumber(),
                     consultaEntity.getSpeciality(),
                     consultaEntity.getDescription(),
                     consultaEntity.getStatus().name(),
-                    consultaEntity.getConsultationDateTime(),
-                    consultaEntity.getId()
+                    consultaEntity.getConsultationDateTime()
+
             );
         }
         return consultaMapper.toDomainEntity(consultaEntity);
     }
+
     public List<Consulta> findAll() {
 
         logger.debug("Buscando todas as consultas via fn_BuscarTodasConsultas()");
@@ -95,12 +97,12 @@ public class ConsultaRepository implements ConsultaOutputPort {
 
         logger.debug("Buscando consultas futuras a partir de {}", now);
 
-        String sql = "SELECT * FROM consulta WHERE consultationdatetime > ?";
+        String sql = "SELECT * FROM fn_find_upcoming_consultas(?)";
         return jdbcTemplate.query(sql, consultaRowMapper, now);
     }
 
     public Optional<Consulta> findById(UUID id) {
-        String sql = "SELECT * FROM consulta WHERE id = ?";
+        String sql = "SELECT * FROM fn_find_consulta_by_id(?)";
         try {
             logger.debug("Buscando consulta com id {}", id);
 
@@ -116,7 +118,7 @@ public class ConsultaRepository implements ConsultaOutputPort {
     public void delete(Consulta consulta) {
         logger.info("Deletando consulta com id {}", consulta.getId());
 
-        String sql = "DELETE FROM consulta WHERE id = ?";
+        String sql = "call pr_delete_consulta(?)";
         jdbcTemplate.update(sql, consulta.getId());
     }
 
