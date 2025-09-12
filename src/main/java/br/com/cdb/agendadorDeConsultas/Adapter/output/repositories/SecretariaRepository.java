@@ -37,63 +37,58 @@ public class SecretariaRepository implements SecretariaOutputPort {
     };
 
 
-    @Override
-    public Secretaria save(Secretaria secretaria) {
-        SecretariaEntity secretariaEntity = secretariaMapper.toEntity(secretaria);
-        if (secretariaEntity.getId() == null) {
-            UUID id = UUID.randomUUID();
-            secretariaEntity.setId(id);
+        @Override
+        public Secretaria save(Secretaria secretaria) {
+            SecretariaEntity secretariaEntity = secretariaMapper.toEntity(secretaria);
+            if (secretariaEntity.getId() == null) {
+                UUID id = UUID.randomUUID();
+                secretariaEntity.setId(id);
+            }
+                logger.info("Executando upsert para Secretaria com id {}", secretariaEntity.getId());
 
-            logger.info("Inserindo nova Secretaria com id {}", id);
-            jdbcTemplate.update(
-                    "call pr_upsert_secretaria(?, ?, ?)",
-                    id,
-                    secretariaEntity.getNome(),
-                    secretariaEntity.getEmail()
-            );
-        }else {
-            logger.info("Atualizando Secretaria com id {}", secretariaEntity.getId());
-            jdbcTemplate.update(
-                    "call pr_upsert_secretaria(?, ?, ?)",
-                    secretariaEntity.getId(),
-                    secretariaEntity.getNome(),
-                    secretariaEntity.getEmail()
-            );
+                jdbcTemplate.update(
+                        "call pr_upsert_secretaria(?, ?, ?, ?, ?)",
+                        secretariaEntity.getId(),
+                        secretariaEntity.getNome(),
+                        secretariaEntity.getCpf(),
+                        secretariaEntity.getEmail(),
+                        secretariaEntity.getPassword()
+                );
+
+                return secretariaMapper.toDomainEntity(secretariaEntity);
+
         }
-        return secretariaMapper.toDomainEntity(secretariaEntity);
-    }
+        @Override
+        public List<Secretaria> findAll () {
 
-    @Override
-    public List<Secretaria> findAll() {
+            logger.debug("Buscando todas as consultas via fn_BuscarTodasSecretarias()");
+            String sql = "SELECT * FROM fn_BuscarTodasSecretarias()";
+            return jdbcTemplate.query(sql, secretariaRowMapper);
+        }
 
-        logger.debug("Buscando todas as consultas via fn_BuscarTodasSecretarias()");
-        String sql = "SELECT * FROM fn_BuscarTodasSecretarias()";
-        return jdbcTemplate.query(sql, secretariaRowMapper);
-    }
+        @Override
 
-    @Override
+        public Secretaria findById (UUID id){
 
-    public Secretaria findById(UUID id) {
+            String sql = "SELECT * FROM fn_find_secretaria_by_id(?)";
+            try {
+                logger.debug("Buscando secretaria com id {}", id);
+                return jdbcTemplate.queryForObject(sql, secretariaRowMapper, id);
 
-        String sql = "SELECT * FROM fn_find_secretaria_by_id(?)";
-        try {
-            logger.debug("Buscando secretaria com id {}", id);
-            return jdbcTemplate.queryForObject(sql, secretariaRowMapper, id);
+            } catch (EmptyResultDataAccessException e) {
+                logger.warn("Nenhuma secretaria encontrada com id {}", id);
+                throw new RuntimeException("Recurso não encontrado: Secretaria com id " + id); // Ou uma exceção customizada
 
-        } catch (EmptyResultDataAccessException e) {
-            logger.warn("Nenhuma secretaria encontrada com id {}", id);
-            throw new RuntimeException("Recurso não encontrado: Secretaria com id " + id); // Ou uma exceção customizada
+            }
 
         }
 
-    }
+        @Override
+        public void delete (Secretaria secretaria){
+            logger.info("Deletando secretaria com id {}", secretaria.getId());
 
-    @Override
-    public void delete(Secretaria secretaria) {
-        logger.info("Deletando secretaria com id {}",secretaria.getId());
-
-        String sql = "call pr_delete_secretaria(?)";
-        jdbcTemplate.update(sql, secretaria.getId());
-    }
+            String sql = "call pr_delete_secretaria(?)";
+            jdbcTemplate.update(sql, secretaria.getId());
+        }
 
 }
