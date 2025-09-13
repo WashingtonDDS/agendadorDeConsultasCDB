@@ -1,7 +1,12 @@
 
 ALTER TABLE secretaria RENAME COLUMN nome TO name;
 
-CREATE OR REPLACE PROCEDURE pr_upsert_secretaria(
+
+DROP PROCEDURE pr_upsert_secretaria(UUID, VARCHAR, VARCHAR, VARCHAR, VARCHAR);
+
+
+
+CREATE PROCEDURE pr_upsert_secretaria(
     p_id UUID,
     p_name VARCHAR,
     p_cpf VARCHAR,
