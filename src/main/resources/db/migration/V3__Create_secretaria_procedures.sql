@@ -43,3 +43,15 @@ BEGIN
     DELETE FROM secretaria WHERE id = p_id;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION fn_find_secretaria_by_email(p_email VARCHAR)
+RETURNS SETOF secretaria
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT * FROM secretaria
+    WHERE email = p_email
+    LIMIT 1;
+END;
+$$;
