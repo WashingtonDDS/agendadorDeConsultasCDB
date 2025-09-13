@@ -29,7 +29,9 @@ public class Consulta {
 
     private LocalDateTime consultationDateTime;
 
-    public Consulta(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description,StatusConsulta status, LocalDateTime  dataConsulta) {
+    private UUID secretariaId;
+
+    public Consulta(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description, StatusConsulta status, LocalDateTime  dataConsulta, UUID secretariaId) {
         this.id = id;
         this.doctorName = doctorName;
         this.patientName = patientName;
@@ -39,7 +41,17 @@ public class Consulta {
         this.status = status;
         this.consultationDateTime = dataConsulta;
 
+        this.secretariaId = secretariaId;
     }
+
+    public UUID getSecretariaId() {
+        return secretariaId;
+    }
+
+    public void setSecretariaId(UUID secretariaId) {
+        this.secretariaId = secretariaId;
+    }
+
     public  Consulta(){
 
     }
