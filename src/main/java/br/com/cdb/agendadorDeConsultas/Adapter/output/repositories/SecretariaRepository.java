@@ -31,7 +31,7 @@ public class SecretariaRepository implements SecretariaOutputPort {
     private final RowMapper<Secretaria> secretariaRowMapper = (rs, rowNum) -> {
         Secretaria secretaria = new Secretaria();
         secretaria.setId(UUID.fromString(rs.getString("id")));
-        secretaria.setNome(rs.getString("nome"));
+        secretaria.setName(rs.getString("name"));
         secretaria.setEmail(rs.getString("email"));
         return secretaria;
     };
@@ -49,7 +49,7 @@ public class SecretariaRepository implements SecretariaOutputPort {
                 jdbcTemplate.update(
                         "call pr_upsert_secretaria(?, ?, ?, ?, ?)",
                         secretariaEntity.getId(),
-                        secretariaEntity.getNome(),
+                        secretariaEntity.getName(),
                         secretariaEntity.getCpf(),
                         secretariaEntity.getEmail(),
                         secretariaEntity.getPassword()
@@ -90,5 +90,18 @@ public class SecretariaRepository implements SecretariaOutputPort {
             String sql = "call pr_delete_secretaria(?)";
             jdbcTemplate.update(sql, secretaria.getId());
         }
+
+    @Override
+    public Optional<Secretaria> findByEmail(String email) {
+        String sql = "SELECT * FROM fn_find_secretaria_by_email(?)";
+        try {
+            logger.debug("Buscando secretaria com email {}", email);
+            Secretaria secretaria = jdbcTemplate.queryForObject(sql, secretariaRowMapper, email);
+            return Optional.of(secretaria);
+        } catch (EmptyResultDataAccessException e) {
+            logger.debug("Nenhuma secretaria encontrada com o email {}", email);
+            return Optional.empty(); // Retorna um Optional vazio se não encontrar
+        }
+    }
 
 }

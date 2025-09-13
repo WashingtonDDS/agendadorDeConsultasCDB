@@ -4,16 +4,16 @@ import java.util.UUID;
 
 public class SecretariaEntity {
     private UUID id;
-    private String nome;
+    private String name;
     private String cpf;
     private String email;
 
     public SecretariaEntity() {
     }
 
-    public SecretariaEntity(UUID id, String nome, String cpf, String email, String password) {
+    public SecretariaEntity(UUID id, String name, String cpf, String email, String password) {
         this.id = id;
-        this.nome = nome;
+        this.name = name;
         this.cpf = cpf;
         this.email = email;
         this.password = password;
@@ -27,12 +27,12 @@ public class SecretariaEntity {
         this.id = id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String nome) {
+        this.name = name;
     }
 
     public String getCpf() {
