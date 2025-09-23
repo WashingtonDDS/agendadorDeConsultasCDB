@@ -1,5 +1,6 @@
 package br.com.cdb.agendadorDeConsultas.core.usecase.validation;
 
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
 import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
@@ -23,6 +24,12 @@ public class SecretariaValidator {
         validarEmail(request.email(), secretariaExistente);
         validarSenha(request.password(), secretariaExistente);
     }
+    public void validateCreate(Secretaria secretariaExistente, SecretariaRequest request) {
+        validarNome(request.name());
+        validarEmail(request.email(), secretariaExistente);
+        validarSenha(request.password(), secretariaExistente);
+    }
+
 
 
     private void validarNome(String nome) {
