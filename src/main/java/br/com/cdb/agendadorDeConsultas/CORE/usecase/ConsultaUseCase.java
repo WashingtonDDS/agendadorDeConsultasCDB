@@ -2,8 +2,11 @@ package br.com.cdb.agendadorDeConsultas.core.usecase;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
+import br.com.cdb.agendadorDeConsultas.core.usecase.validation.ConsultaValidator;
 import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
+import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -13,12 +16,22 @@ public class ConsultaUseCase implements ConsultaInputPort {
 
 
     private final ConsultaOutputPort consultaOutputPort;
+    private final SecretariaOutputPort secretariaOutputPort;
+    private final ConsultaValidator validator;
 
-    public ConsultaUseCase(ConsultaOutputPort consultaOutputPort) {
+    public ConsultaUseCase(ConsultaOutputPort consultaOutputPort, SecretariaOutputPort secretariaOutputPort, ConsultaValidator validator) {
         this.consultaOutputPort = consultaOutputPort;
+        this.secretariaOutputPort = secretariaOutputPort;
+        this.validator = validator;
     }
 
-    public Consulta createConsulta(Consulta consulta){
+    @Override
+    public Consulta createConsulta(UUID secretariaId, Consulta consulta) {
+        validator.validateCreate(secretariaId, consulta);
+
+        secretariaOutputPort.findById(secretariaId);
+        consulta.setSecretariaId(secretariaId);
+
         return consultaOutputPort.save(consulta);
     }
 
@@ -40,37 +53,44 @@ public class ConsultaUseCase implements ConsultaInputPort {
 
     }
 
-    public Consulta updateConsulta( UUID id, ConsultaUpdate request) {
+       @Override
+    public Consulta updateConsulta(UUID secretariaId, UUID id, ConsultaUpdate request) {
         Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
-        if (request.doctorName() != null) {
-            consulta.setDoctorName(request.doctorName());
-        }
-        if (request.patientName() != null) {
-            consulta.setPatientName(request.patientName());
-        }
-        if (request.patientNumber() != null) {
-            consulta.setPatientNumber(request.patientNumber());
-        }
-        if (request.consultationDateTime() != null) {
-            consulta.setConsultationDateTime(request.consultationDateTime());
-        }
+        validator.validateUpdate(secretariaId, consulta, request);
+
+        consulta.setDoctorName(request.doctorName());
+        consulta.setPatientName(request.patientName());
+        consulta.setPatientNumber(request.patientNumber());
+        consulta.setConsultationDateTime(request.consultationDateTime());
+
+        consulta.setSecretariaId(secretariaId);
 
         return consultaOutputPort.save(consulta);
     }
 
-    public Consulta canceledConsulta(UUID id) {
+    @Override
+    public Consulta canceledConsulta(UUID secretariaId, UUID id) {
+        secretariaOutputPort.findById(secretariaId);
         Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
+
+        validator.validateCancelOrDelete(secretariaId, consulta);
 
         consulta.setStatus(StatusConsulta.CANCELADA);
+        consulta.setSecretariaId(secretariaId);
 
         return consultaOutputPort.save(consulta);
     }
-    public void deleteConsulta(UUID id) {
+
+    @Override
+    public void deleteConsulta(UUID secretariaId, UUID id) {
         Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
+
+        validator.validateCancelOrDelete(secretariaId, consulta);
+
         consultaOutputPort.delete(consulta);
     }
 
