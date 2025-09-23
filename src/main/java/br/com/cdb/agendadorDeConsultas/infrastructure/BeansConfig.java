@@ -2,6 +2,7 @@ package br.com.cdb.agendadorDeConsultas.infrastructure;
 
 import br.com.cdb.agendadorDeConsultas.core.usecase.ConsultaUseCase;
 import br.com.cdb.agendadorDeConsultas.core.usecase.SecretariaUseCase;
+import br.com.cdb.agendadorDeConsultas.core.usecase.validation.ConsultaValidator;
 import br.com.cdb.agendadorDeConsultas.core.usecase.validation.SecretariaValidator;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
@@ -25,8 +26,8 @@ public class BeansConfig {
     }
 
     @Bean
-    public ConsultaUseCase consultaUseCaseImpl(ConsultaOutputPort consultaOutputPort){
-        return new ConsultaUseCase(consultaOutputPort);
+    public ConsultaUseCase consultaUseCaseImpl(ConsultaOutputPort consultaOutputPort, SecretariaOutputPort secretariaOutputPort, ConsultaValidator consultaValidator){
+        return new ConsultaUseCase(consultaOutputPort, secretariaOutputPort, consultaValidator);
     }
 
     @Bean
