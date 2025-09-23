@@ -9,6 +9,6 @@ import java.util.UUID;
 public record ConsultaResponse(UUID id, String doctorName, String patientName, String patientNumber, String speciality, String description,
                                StatusConsulta status,
                                @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING)
-                                  LocalDateTime consultationDateTime) {
+                                  LocalDateTime consultationDateTime, UUID secretariaId) {
     
 }
