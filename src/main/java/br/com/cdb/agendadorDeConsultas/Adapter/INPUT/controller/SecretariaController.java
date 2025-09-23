@@ -5,6 +5,7 @@ import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaResponse;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
+import br.com.cdb.agendadorDeConsultas.core.usecase.validation.SecretariaValidator;
 import br.com.cdb.agendadorDeConsultas.port.input.SecretariaInputPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +24,20 @@ public class SecretariaController {
 
     private SecretariaInputPort secretariaInputPort;
 
+    private final SecretariaValidator validator;
+
     private SecretariaMapper secretariaMapper;
+
+    public SecretariaController(SecretariaValidator validator) {
+        this.validator = validator;
+    }
 
     @PostMapping
     public ResponseEntity<SecretariaResponse> createSecretaria(@RequestBody SecretariaRequest body) {
         logger.info("Recebida requisição para criar secretaria: {}", body);
 
         Secretaria secretaria = secretariaMapper.toDomain(body);
+        validator.validateCreate(secretaria, body);
         Secretaria newSecretaria = secretariaInputPort.create(secretaria);
 
         logger.debug("Secretaria criada com ID: {}", newSecretaria.getId());
