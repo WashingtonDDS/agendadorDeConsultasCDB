@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ConsultaInputPort {
-    public Consulta createConsulta(Consulta Consulta);
+    public Consulta createConsulta(UUID secretariaId,Consulta Consulta);
     public List<Consulta> getConsultas();
     public List<Consulta> getUpcomingConsultas();
     public Consulta getConsultaDetails( UUID id);
-    public Consulta updateConsulta( UUID id, ConsultaUpdate request);
-    public Consulta canceledConsulta(UUID id);
-    public void deleteConsulta(UUID id);
+    public Consulta updateConsulta( UUID secretariaId,UUID id, ConsultaUpdate request);
+    public Consulta canceledConsulta(UUID secretariaId,UUID id);
+    public void deleteConsulta(UUID secretariaId,UUID id);
 }
