@@ -32,14 +32,14 @@ public class ConsultaController {
 
 
 
-    @PostMapping
-    public ResponseEntity<ConsultaResponse> create(@RequestBody ConsultaRequest body){
-        logger.info("Recebida requisição para criar consulta: {}", body);
+    @PostMapping("/{secretariaId}")
+    public ResponseEntity<ConsultaResponse> create(@PathVariable UUID secretariaId, @RequestBody ConsultaRequest body){
+        logger.info("Recebida requisição para criar consulta para secretaria {}: {}", secretariaId, body);
 
         Consulta consulta = consultaMapper.toDomain(body);
-        Consulta newConsulta = consultainputPort.createConsulta(consulta);
+        Consulta newConsulta = consultainputPort.createConsulta(secretariaId, consulta);
 
-        logger.debug("Consulta criada com ID: {}", newConsulta.getId());
+        logger.debug("Consulta criada com ID: {} para secretaria {}", newConsulta.getId(), secretariaId);
         return ResponseEntity.ok(consultaMapper.toResponse(newConsulta));
     }
 
@@ -78,37 +78,41 @@ public class ConsultaController {
         ConsultaDetails details = consultaMapper.toDetails(consulta);
         return ResponseEntity.ok(details);
     }
-    @PutMapping("/{id}")
+
+    @PutMapping("/{secretariaId}/{id}")
     public ResponseEntity<ConsultaResponse> updateConsulta(
+            @PathVariable UUID secretariaId,
             @PathVariable UUID id,
             @RequestBody ConsultaUpdate request) {
-        logger.info("Recebida requisição para atualizar consulta com ID: {}", id);
+        logger.info("Recebida requisição para atualizar consulta com ID: {} pela secretaria com ID: {}", id, secretariaId);
 
-        Consulta updatedConsulta = consultainputPort.updateConsulta(id, request);
+        Consulta updatedConsulta = consultainputPort.updateConsulta(secretariaId, id, request);
         ConsultaResponse responseDTO = consultaMapper.toResponse(updatedConsulta);
 
-        logger.debug("Consulta atualizada com ID: {}", updatedConsulta.getId());
+        logger.debug("Consulta atualizada com ID: {} pela secretaria com ID: {}", updatedConsulta.getId(), secretariaId);
         return ResponseEntity.ok(responseDTO);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ConsultaResponse> cancelledConsulta(@PathVariable UUID id) {
-        logger.info("Recebida requisição para cancelar consulta com ID: {}", id);
+    @PatchMapping("/{secretariaId}/{id}")
+    public ResponseEntity<ConsultaResponse> cancelledConsulta(@PathVariable UUID secretariaId, @PathVariable UUID id) {
+        logger.info("Recebida requisição para cancelar consulta com ID: {} pela secretaria com ID: {}", id, secretariaId);
 
-        Consulta cancelledConsulta = consultainputPort.canceledConsulta(id);
+        Consulta cancelledConsulta = consultainputPort.canceledConsulta(secretariaId, id);
         ConsultaResponse responseDTO = consultaMapper.toResponse(cancelledConsulta);
 
-        logger.debug("Consulta cancelada com ID: {}", cancelledConsulta.getId());
+        logger.debug("Consulta cancelada com ID: {} pela secretaria com ID: {}", cancelledConsulta.getId(), secretariaId);
         return ResponseEntity.ok(responseDTO);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteConsulta(@PathVariable UUID id) {
-        logger.info("Recebida requisição para excluir consulta com ID: {}", id);
 
-        consultainputPort.deleteConsulta(id);
-        logger.debug("Consulta excluída com ID: {}", id);
+    @DeleteMapping("/{secretariaId}/{id}")
+    public ResponseEntity<Void> deleteConsulta(@PathVariable UUID secretariaId, @PathVariable UUID id) {
+        logger.info("Recebida requisição para excluir consulta com ID: {} pela secretaria com ID: {}", id, secretariaId);
+
+        consultainputPort.deleteConsulta(secretariaId, id);
+        logger.debug("Consulta excluída com ID: {} pela secretaria com ID: {}", id, secretariaId);
 
         return ResponseEntity.noContent().build();
     }
+
 }
