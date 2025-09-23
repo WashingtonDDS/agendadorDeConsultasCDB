@@ -37,6 +37,7 @@ public class ConsultaRepository implements ConsultaOutputPort {
         consulta.setDescription(rs.getString("description"));
         consulta.setStatus(StatusConsulta.valueOf(rs.getString("status")));
         consulta.setConsultationDateTime(rs.getTimestamp("consultationdatetime").toLocalDateTime());
+        consulta.setSecretariaId(UUID.fromString(rs.getString("secretariaid")));
         return consulta;
     };
 
@@ -55,7 +56,7 @@ public class ConsultaRepository implements ConsultaOutputPort {
             logger.info("Inserindo nova consulta com id {}", id);
 
             jdbcTemplate.update(
-                    "call pr_upsert_consulta(?, ?, ?, ?, ?, ?, ?, ?)",
+                    "call pr_upsert_consulta(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     consultaEntity.getDoctorName(),
                     consultaEntity.getPatientName(),
@@ -63,14 +64,15 @@ public class ConsultaRepository implements ConsultaOutputPort {
                     consultaEntity.getSpeciality(),
                     consultaEntity.getDescription(),
                     consultaEntity.getStatus().name(),
-                    consultaEntity.getConsultationDateTime()
+                    consultaEntity.getConsultationDateTime(),
+                    consultaEntity.getSecretariaId()
             );
         } else {
 
             logger.info("Atualizando consulta com id {}", consultaEntity.getId());
 
             jdbcTemplate.update(
-                    "call pr_upsert_consulta(?, ?, ?, ?, ?, ?, ?, ?)",
+                    "call pr_upsert_consulta(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     consultaEntity.getId(),
                     consultaEntity.getDoctorName(),
                     consultaEntity.getPatientName(),
@@ -78,7 +80,8 @@ public class ConsultaRepository implements ConsultaOutputPort {
                     consultaEntity.getSpeciality(),
                     consultaEntity.getDescription(),
                     consultaEntity.getStatus().name(),
-                    consultaEntity.getConsultationDateTime()
+                    consultaEntity.getConsultationDateTime(),
+                    consultaEntity.getSecretariaId()
 
             );
         }
@@ -120,6 +123,15 @@ public class ConsultaRepository implements ConsultaOutputPort {
 
         String sql = "call pr_delete_consulta(?)";
         jdbcTemplate.update(sql, consulta.getId());
+    }
+
+    @Override
+    public List<Consulta> findByDoctorNameAndDateTime(String doctorName, LocalDateTime dateTime) {
+        logger.debug("Buscando consultas para o médico {} na data/hora {}", doctorName, dateTime);
+
+        String sql = "SELECT * FROM fn_find_consultas_by_doctor_and_datetime(?, ?)";
+
+        return jdbcTemplate.query(sql, consultaRowMapper, doctorName, dateTime);
     }
 
 
