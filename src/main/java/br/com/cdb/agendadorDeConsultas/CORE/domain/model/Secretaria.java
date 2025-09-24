@@ -19,9 +19,7 @@ public class Secretaria {
 
     }
 
-    public Secretaria(String password) {
 
-    }
 
     public Secretaria() {
 
@@ -49,8 +47,8 @@ public class Secretaria {
         return name;
     }
 
-    public void setName(String nome) {
-        this.name = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getCpf() {

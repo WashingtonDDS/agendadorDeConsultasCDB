@@ -11,7 +11,6 @@ public class ConsultaEntity {
 
     private UUID id;
 
-
     private String doctorName;
 
     private String patientName;
@@ -28,8 +27,13 @@ public class ConsultaEntity {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime consultationDateTime;
 
-    public ConsultaEntity(UUID id, String patientNumber, String doctorName, String patientName, String speciality, String description,StatusConsulta status, LocalDateTime  dataConsulta) {
+    private UUID secretariaId;
+
+
+
+    public ConsultaEntity(UUID id,UUID secretariaId, String patientNumber, String doctorName, String patientName, String speciality, String description,StatusConsulta status, LocalDateTime  dataConsulta) {
         this.id = id;
+        this.secretariaId = secretariaId;
         this.doctorName = doctorName;
         this.patientName = patientName;
         this.patientNumber = patientNumber;
@@ -41,6 +45,14 @@ public class ConsultaEntity {
     }
     public  ConsultaEntity(){
 
+    }
+
+    public UUID getSecretariaId() {
+        return secretariaId;
+    }
+
+    public void setSecretariaId(UUID secretariaId) {
+        this.secretariaId = secretariaId;
     }
 
     public String getPatientNumber() {

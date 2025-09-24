@@ -5,6 +5,7 @@ import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaResponse;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
+import br.com.cdb.agendadorDeConsultas.core.usecase.validation.SecretariaValidator;
 import br.com.cdb.agendadorDeConsultas.port.input.SecretariaInputPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +16,24 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @RestController
 @RequestMapping("/secretarias")
 public class SecretariaController {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsultaController.class);
 
-    private SecretariaInputPort secretariaInputPort;
+    private final SecretariaInputPort secretariaInputPort;
 
-    private SecretariaMapper secretariaMapper;
+    private final SecretariaValidator validator;
+
+    private final SecretariaMapper secretariaMapper;
+
+    public SecretariaController(SecretariaValidator validator, SecretariaMapper secretariaMapper, SecretariaInputPort secretariaInputPort) {
+        this.validator = validator;
+        this.secretariaMapper = secretariaMapper;
+        this.secretariaInputPort = secretariaInputPort;
+    }
 
     @PostMapping
     public ResponseEntity<SecretariaResponse> createSecretaria(@RequestBody SecretariaRequest body) {

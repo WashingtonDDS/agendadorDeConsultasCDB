@@ -1,4 +1,4 @@
 package br.com.cdb.agendadorDeConsultas.adapter.input.request;
 
-public record SecretariaRequest(String nome, String cpf, String email, String password) {
+public record SecretariaRequest(String name, String cpf, String email, String password) {
 }

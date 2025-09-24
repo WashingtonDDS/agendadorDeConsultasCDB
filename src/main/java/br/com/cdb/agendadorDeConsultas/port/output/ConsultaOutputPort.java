@@ -13,4 +13,6 @@ public interface ConsultaOutputPort {
     List<Consulta> findUpcomingConsultas(LocalDateTime now);
     Optional<Consulta> findById(UUID id);
     void delete(Consulta consulta);
+    List<Consulta> findByDoctorNameAndDateTime(String doctorName, LocalDateTime dateTime);
+
 }
