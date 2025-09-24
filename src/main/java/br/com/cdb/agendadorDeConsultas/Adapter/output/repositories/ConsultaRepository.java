@@ -37,7 +37,7 @@ public class ConsultaRepository implements ConsultaOutputPort {
         consulta.setDescription(rs.getString("description"));
         consulta.setStatus(StatusConsulta.valueOf(rs.getString("status")));
         consulta.setConsultationDateTime(rs.getTimestamp("consultationdatetime").toLocalDateTime());
-        consulta.setSecretariaId(UUID.fromString(rs.getString("secretariaid")));
+        consulta.setSecretariaId(UUID.fromString(rs.getString("secretaria_id")));
         return consulta;
     };
 

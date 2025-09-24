@@ -18,12 +18,7 @@ public class BeansConfig {
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
-    @Bean
-    public SecretariaValidator secretariaUpdateValidator(
-            SecretariaOutputPort secretariaOutputPort,
-            PasswordEncoder passwordEncoder) {
-        return new SecretariaValidator(secretariaOutputPort, passwordEncoder);
-    }
+
 
     @Bean
     public ConsultaUseCase consultaUseCaseImpl(ConsultaOutputPort consultaOutputPort, SecretariaOutputPort secretariaOutputPort, ConsultaValidator consultaValidator){
