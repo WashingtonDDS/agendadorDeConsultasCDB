@@ -20,11 +20,12 @@ public class SecretariaRepository implements SecretariaOutputPort {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(SecretariaRepository.class);
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     private final SecretariaMapper secretariaMapper;
 
-    public SecretariaRepository(SecretariaMapper secretariaMapper) {
+    public SecretariaRepository(JdbcTemplate jdbcTemplate, SecretariaMapper secretariaMapper) {
+        this.jdbcTemplate = jdbcTemplate;
         this.secretariaMapper = secretariaMapper;
     }
 
@@ -32,7 +33,9 @@ public class SecretariaRepository implements SecretariaOutputPort {
         Secretaria secretaria = new Secretaria();
         secretaria.setId(UUID.fromString(rs.getString("id")));
         secretaria.setName(rs.getString("name"));
+        secretaria.setCpf(rs.getString("cpf"));
         secretaria.setEmail(rs.getString("email"));
+        secretaria.setPassword(rs.getString("password"));
         return secretaria;
     };
 
@@ -101,6 +104,18 @@ public class SecretariaRepository implements SecretariaOutputPort {
         } catch (EmptyResultDataAccessException e) {
             logger.debug("Nenhuma secretaria encontrada com o email {}", email);
             return Optional.empty(); // Retorna um Optional vazio se não encontrar
+        }
+    }
+    @Override
+    public Optional<Secretaria> findByCpf(String cpf) {
+        String sql = "SELECT * FROM fn_find_secretaria_by_cpf(?)";
+        try {
+            logger.debug("Buscando secretaria com CPF {}", cpf);
+            Secretaria secretaria = jdbcTemplate.queryForObject(sql, secretariaRowMapper, cpf);
+            return Optional.of(secretaria);
+        } catch (EmptyResultDataAccessException e) {
+            logger.debug("Nenhuma secretaria encontrada com o CPF {}", cpf);
+            return Optional.empty();
         }
     }
 

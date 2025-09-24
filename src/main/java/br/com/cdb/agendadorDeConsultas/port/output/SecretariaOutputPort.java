@@ -12,5 +12,6 @@ public interface SecretariaOutputPort {
     Secretaria findById(UUID id);
     void delete(Secretaria secretaria);
     Optional<Secretaria> findByEmail(String email);
+    Optional<Secretaria> findByCpf(String cpf);
 
 }
