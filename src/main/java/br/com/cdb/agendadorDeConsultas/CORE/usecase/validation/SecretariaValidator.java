@@ -1,6 +1,5 @@
 package br.com.cdb.agendadorDeConsultas.core.usecase.validation;
 
-import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
 import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
@@ -18,16 +17,17 @@ public class SecretariaValidator {
         this.passwordEncoder = passwordEncoder;
     }
 
-
-    public void validate(Secretaria secretariaExistente, SecretariaUpdate request) {
-        validarNome(request.name());
-        validarEmail(request.email(), secretariaExistente);
-        validarSenha(request.password(), secretariaExistente);
+    public void validateCreate(Secretaria request) {
+        validarNome(request.getName());
+        validarEmailParaCriacao(request.getEmail());
+        validarCpfParaCriacao(request.getCpf());
+        validarComplexidadeSenha(request.getPassword());
     }
-    public void validateCreate(Secretaria secretariaExistente, SecretariaRequest request) {
+    public void validateUpdate(Secretaria secretariaExistente, SecretariaUpdate request) {
         validarNome(request.name());
-        validarEmail(request.email(), secretariaExistente);
-        validarSenha(request.password(), secretariaExistente);
+        validarEmailParaAtualizacao(request.email(), secretariaExistente);
+        validarComplexidadeSenha(request.password());
+        validarReutilizacaoSenha(request.password(), secretariaExistente);
     }
 
 
@@ -37,30 +37,38 @@ public class SecretariaValidator {
             throw new BusinessRuleValidationException("O nome deve conter apenas letras e espaços.");
         }
     }
+    private void validarCpfParaCriacao(String cpf) {
+        secretariaOutputPort.findByCpf(cpf).ifPresent(s -> {
+            throw new BusinessRuleValidationException("CPF já cadastrado.");
+        });
+    }
 
+    private void validarEmailParaCriacao(String email) {
+        secretariaOutputPort.findByEmail(email).ifPresent(s -> {
+            throw new BusinessRuleValidationException("E-mail já cadastrado.");
+        });
+    }
 
-    private void validarEmail(String novoEmail, Secretaria secretariaExistente) {
+    private void validarEmailParaAtualizacao(String novoEmail, Secretaria secretariaExistente) {
         secretariaOutputPort.findByEmail(novoEmail).ifPresent(outraSecretaria -> {
             if (!outraSecretaria.getId().equals(secretariaExistente.getId())) {
                 throw new BusinessRuleValidationException("E-mail já cadastrado para outro usuário.");
             }
         });
     }
-
-
-    private void validarSenha(String novaSenha, Secretaria secretariaExistente) {
-
-        if (novaSenha == null || novaSenha.length() < 8) {
+    private void validarComplexidadeSenha(String senha) {
+        String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
+        if (!senha.matches(passwordPattern)) {
             throw new BusinessRuleValidationException(
-
-                    "A senha deve ter no mínimo 8 caracteres."
+                    "A senha deve ter no mínimo 8 caracteres, incluindo pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial (@#$%^&+=)."
             );
-
         }
+    }
 
+
+    private void validarReutilizacaoSenha(String novaSenha, Secretaria secretariaExistente) {
         if (passwordEncoder.matches(novaSenha, secretariaExistente.getPassword())) {
-            throw new BusinessRuleValidationException("A nova senha não pode ser igual à senha anterior.");
+            throw new BusinessRuleValidationException("A nova senha не pode ser igual à senha anterior.");
         }
-
     }
 }
