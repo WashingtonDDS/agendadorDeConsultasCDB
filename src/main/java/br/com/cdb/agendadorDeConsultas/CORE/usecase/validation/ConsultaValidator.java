@@ -2,6 +2,7 @@ package br.com.cdb.agendadorDeConsultas.core.usecase.validation;
 
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
@@ -44,6 +45,15 @@ public class ConsultaValidator {
         checkSecretariaExists(secretariaId);
         checkPermission(secretariaId, consulta);
         checkCanBeModified(consulta);
+    }
+    public void validateForDelete(UUID secretariaId, Consulta consulta) {
+        checkSecretariaExists(secretariaId);
+        checkPermission(secretariaId, consulta);
+        boolean jaOcorreu = consulta.getConsultationDateTime().isBefore(LocalDateTime.now());
+        boolean estaCancelada = consulta.getStatus() == StatusConsulta.CANCELADA;
+        if (!jaOcorreu && !estaCancelada) {
+            throw new BusinessRuleValidationException("Uma consulta futura e agendada não pode ser deletada. Cancele-a primeiro.");
+        }
     }
     private void checkSecretariaExists(UUID secretariaId) {
         secretariaOutputPort.findById(secretariaId);
