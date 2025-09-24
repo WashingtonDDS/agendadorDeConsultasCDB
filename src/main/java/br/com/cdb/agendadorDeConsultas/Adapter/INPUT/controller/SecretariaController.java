@@ -16,20 +16,23 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @RestController
 @RequestMapping("/secretarias")
 public class SecretariaController {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsultaController.class);
 
-    private SecretariaInputPort secretariaInputPort;
+    private final SecretariaInputPort secretariaInputPort;
 
     private final SecretariaValidator validator;
 
-    private SecretariaMapper secretariaMapper;
+    private final SecretariaMapper secretariaMapper;
 
-    public SecretariaController(SecretariaValidator validator) {
+    public SecretariaController(SecretariaValidator validator, SecretariaMapper secretariaMapper, SecretariaInputPort secretariaInputPort) {
         this.validator = validator;
+        this.secretariaMapper = secretariaMapper;
+        this.secretariaInputPort = secretariaInputPort;
     }
 
     @PostMapping
@@ -37,7 +40,6 @@ public class SecretariaController {
         logger.info("Recebida requisição para criar secretaria: {}", body);
 
         Secretaria secretaria = secretariaMapper.toDomain(body);
-        validator.validateCreate(secretaria, body);
         Secretaria newSecretaria = secretariaInputPort.create(secretaria);
 
         logger.debug("Secretaria criada com ID: {}", newSecretaria.getId());

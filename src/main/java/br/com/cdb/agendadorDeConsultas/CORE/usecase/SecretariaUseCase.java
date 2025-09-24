@@ -25,6 +25,8 @@ public class SecretariaUseCase implements SecretariaInputPort {
 
     @Override
     public Secretaria create(Secretaria secretaria) {
+        validator.validateCreate(secretaria);
+
         secretaria.setPassword(passwordEncoder.encode(secretaria.getPassword()));
         return secretariaOutputPort.save(secretaria);
     }
@@ -49,7 +51,7 @@ public class SecretariaUseCase implements SecretariaInputPort {
     public Secretaria update(UUID id, SecretariaUpdate secretariaUpdate) {
         Secretaria secretaria = secretariaOutputPort.findById(id);
 
-        validator.validate(secretaria, secretariaUpdate);
+        validator.validateUpdate(secretaria, secretariaUpdate);
 
         secretaria.setName(secretariaUpdate.name());
         secretaria.setEmail(secretariaUpdate.email());
