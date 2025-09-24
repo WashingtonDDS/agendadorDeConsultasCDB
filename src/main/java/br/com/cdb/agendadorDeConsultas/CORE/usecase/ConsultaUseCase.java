@@ -89,7 +89,7 @@ public class ConsultaUseCase implements ConsultaInputPort {
         Consulta consulta = consultaOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta not found"));
 
-        validator.validateCancelOrDelete(secretariaId, consulta);
+        validator.validateForDelete(secretariaId, consulta);
 
         consultaOutputPort.delete(consulta);
     }
