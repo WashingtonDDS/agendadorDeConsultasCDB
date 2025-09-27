@@ -37,7 +37,7 @@ class SecretariaUseCaseTest {
     @DisplayName("Deve criar uma secretária com sucesso")
     void create_Success() {
         Secretaria secretaria = SecretariaFactoryBot.build();
-        when(passwordEncoder.encode(secretaria.getPassword())).thenReturn("encodedPassword");
+        when(passwordEncoder.encode(secretaria.getPassword())).thenReturn("rawPassword123");
         when(secretariaOutputPort.save(any(Secretaria.class))).thenReturn(secretaria);
 
         Secretaria result = secretariaUseCase.create(secretaria);
@@ -45,7 +45,7 @@ class SecretariaUseCaseTest {
         verify(validator, times(1)).validateCreate(secretaria);
         verify(passwordEncoder, times(1)).encode(secretaria.getPassword());
         verify(secretariaOutputPort, times(1)).save(secretaria);
-        assertEquals("encodedPassword", result.getPassword());
+        assertEquals("rawPassword123", result.getPassword());
     }
 
     @Test
