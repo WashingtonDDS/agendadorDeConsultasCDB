@@ -49,10 +49,10 @@ class ConsultaControllerTest {
     @MockitoBean
     private ConsultaMapper consultaMapper;
 
-    private static final UUID CONSULTA_ID = UUID.randomUUID();
-    private static final UUID SECRETARIA_ID = UUID.randomUUID();
-    private static final String DOCTOR_NAME = "Dr. House";
-    private static final String PATIENT_NAME = "John Doe";
+    static final UUID CONSULTA_ID = UUID.randomUUID();
+    static final UUID SECRETARIA_ID = UUID.randomUUID();
+    static final String DOCTOR_NAME = "Dr. House";
+    static final String PATIENT_NAME = "John Doe";
 
     @Test
     @DisplayName("Deve agendar uma nova consulta com sucesso quando os dados são válidos")
@@ -74,6 +74,21 @@ class ConsultaControllerTest {
         result.andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(CONSULTA_ID.toString()))
                 .andExpect(jsonPath("$.secretariaId").value(SECRETARIA_ID.toString()));
+    }
+
+    @Test
+    @DisplayName("Deve retornar 400 Bad Request ao tentar agendar consulta com dados inválidos")
+    void create_shouldReturnBadRequest_whenDataIsInvalid() throws Exception {
+        ConsultaRequest request = ConsultaFactoryBot.buildRequest();
+        when(consultaMapper.toDomain(any(ConsultaRequest.class))).thenReturn(new Consulta());
+        when(consultaUseCase.createConsulta(eq(SECRETARIA_ID), any(Consulta.class)))
+                .thenThrow(new BusinessRuleValidationException("Dados da consulta inválidos"));
+
+        mockMvc.perform(post("/consultas/{secretariaId}", SECRETARIA_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Dados da consulta inválidos"));
     }
 
     @Test
@@ -166,8 +181,6 @@ class ConsultaControllerTest {
         result.andExpect(status().isNoContent());
     }
 
-
-
     @Test
     @DisplayName("Deve retornar 404 Not Found ao buscar detalhes de uma consulta com ID inexistente")
     void getConsultaDetails_shouldReturnNotFound_whenIdDoesNotExist() throws Exception {
@@ -194,6 +207,17 @@ class ConsultaControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar 404 Not Found ao tentar cancelar uma consulta com ID inexistente")
+    void cancelledConsulta_shouldReturnNotFound_whenIdDoesNotExist() throws Exception {
+        UUID idInexistente = UUID.randomUUID();
+        when(consultaUseCase.canceledConsulta(SECRETARIA_ID, idInexistente))
+                .thenThrow(new EntityNotFoundException("Consulta não encontrada para cancelamento"));
+
+        mockMvc.perform(patch("/consultas/{secretariaId}/{id}", SECRETARIA_ID, idInexistente))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("Deve retornar 400 Bad Request ao tentar cancelar consulta que já ocorreu")
     void cancelledConsulta_shouldReturnBadRequest_whenConsultaAlreadyHappened() throws Exception {
         when(consultaUseCase.canceledConsulta(SECRETARIA_ID, CONSULTA_ID))
@@ -214,7 +238,4 @@ class ConsultaControllerTest {
         mockMvc.perform(delete("/consultas/{secretariaId}/{id}", SECRETARIA_ID, idInexistente))
                 .andExpect(status().isNotFound());
     }
-
-
-
 }

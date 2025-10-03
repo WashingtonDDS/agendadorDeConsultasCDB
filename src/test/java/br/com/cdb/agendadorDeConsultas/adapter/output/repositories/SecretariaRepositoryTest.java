@@ -1,8 +1,12 @@
 package br.com.cdb.agendadorDeConsultas.adapter.output.repositories;
 
+import br.com.cdb.agendadorDeConsultas.adapter.input.mapper.ConsultaMapper;
 import br.com.cdb.agendadorDeConsultas.adapter.input.mapper.SecretariaMapper;
+import br.com.cdb.agendadorDeConsultas.adapter.output.entity.ConsultaEntity;
 import br.com.cdb.agendadorDeConsultas.adapter.output.entity.SecretariaEntity;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
+import br.com.cdb.agendadorDeConsultas.factory.ConsultaFactoryBot;
 import br.com.cdb.agendadorDeConsultas.factory.SecretariaFactoryBot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -303,5 +307,23 @@ class SecretariaRepositoryTest {
         );
 
         assertNotNull(uuidCaptor.getValue(), "Um novo UUID deveria ter sido gerado e passado para o jdbcTemplate.");
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar secretaria com erro de banco de dados")
+    void save_shouldThrowExceptionOnDatabaseError() {
+        // Arrange
+        Secretaria secretaria = SecretariaFactoryBot.build();
+        SecretariaEntity secretariaEntity = new SecretariaEntity();
+        when(secretariaMapper.toEntity(secretaria)).thenReturn(secretariaEntity);
+
+        doThrow(new RuntimeException("Database error"))
+                .when(jdbcTemplate).update(eq("call pr_upsert_secretaria(?, ?, ?, ?, ?)"), any(), any(), any(), any(), any());
+
+
+        assertThrows(RuntimeException.class, () -> secretariaRepository.save(secretaria));
+
+
+        verify(jdbcTemplate).update(eq("call pr_upsert_secretaria(?, ?, ?, ?, ?)"), any(), any(), any(), any(), any());
     }
 }

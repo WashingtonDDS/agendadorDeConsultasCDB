@@ -3,7 +3,8 @@ package br.com.cdb.agendadorDeConsultas.core.usecase;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
-import br.com.cdb.agendadorDeConsultas.core.usecase.validation.ConsultaValidator;
+import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
+import br.com.cdb.agendadorDeConsultas.util.validation.ConsultaValidator;
 import br.com.cdb.agendadorDeConsultas.factory.ConsultaFactoryBot;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
@@ -276,5 +277,64 @@ class ConsultaUseCaseTest {
 
         assertThrows(IllegalArgumentException.class, () -> consultaUseCase.deleteConsulta(secretariaId, consultaId));
         verify(consultaOutputPort, never()).delete(any());
+    }
+
+
+    @Test
+    @DisplayName("Deve lançar exceção quando validator lançar BusinessRuleValidationException ao criar")
+    void createConsulta_ShouldThrowBusinessRuleValidationException() {
+        UUID secretariaId = UUID.randomUUID();
+        Consulta consulta = ConsultaFactoryBot.build();
+
+        doThrow(new BusinessRuleValidationException("Regra de negócio violada"))
+                .when(validator).validateCreate(secretariaId, consulta);
+
+        assertThrows(BusinessRuleValidationException.class,
+                () -> consultaUseCase.createConsulta(secretariaId, consulta));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao buscar detalhes de consulta inexistente")
+    void getConsultaDetails_ShouldThrowExceptionWhenNotFound() {
+        UUID consultaId = UUID.randomUUID();
+        when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> consultaUseCase.getConsultaDetails(consultaId));
+
+        assertEquals("Consulta not found", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve lançar BusinessRuleValidationException ao cancelar consulta")
+    void canceledConsulta_ShouldThrowBusinessRuleValidationException() {
+        UUID secretariaId = UUID.randomUUID();
+        UUID consultaId = UUID.randomUUID();
+        Consulta consulta = ConsultaFactoryBot.build();
+
+        when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.of(consulta));
+        doThrow(new BusinessRuleValidationException("Não pode cancelar"))
+                .when(validator).validateCancelOrDelete(secretariaId, consulta);
+
+        assertThrows(BusinessRuleValidationException.class,
+                () -> consultaUseCase.canceledConsulta(secretariaId, consultaId));
+    }
+
+    @Test
+    @DisplayName("getUpcomingConsultas: Não deve retornar consultas canceladas")
+    void getUpcomingConsultas_ShouldNotReturnCanceled() {
+        Consulta agendada = ConsultaFactoryBot.build();
+        agendada.setStatus(StatusConsulta.AGENDADA);
+
+        Consulta cancelada = ConsultaFactoryBot.build();
+        cancelada.setStatus(StatusConsulta.CANCELADA);
+
+        when(consultaOutputPort.findUpcomingConsultas(any(LocalDateTime.class)))
+                .thenReturn(List.of(agendada, cancelada));
+
+        List<Consulta> result = consultaUseCase.getUpcomingConsultas();
+
+        assertEquals(1, result.size());
+        assertEquals(StatusConsulta.AGENDADA, result.get(0).getStatus());
     }
 }

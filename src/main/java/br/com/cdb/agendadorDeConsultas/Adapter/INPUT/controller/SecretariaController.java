@@ -5,7 +5,6 @@ import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaResponse;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
-import br.com.cdb.agendadorDeConsultas.core.usecase.validation.SecretariaValidator;
 import br.com.cdb.agendadorDeConsultas.port.input.SecretariaInputPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

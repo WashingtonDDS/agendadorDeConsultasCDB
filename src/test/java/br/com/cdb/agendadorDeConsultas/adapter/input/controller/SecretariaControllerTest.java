@@ -1,12 +1,16 @@
 package br.com.cdb.agendadorDeConsultas.adapter.input.controller;
 
+import br.com.cdb.agendadorDeConsultas.adapter.input.mapper.ConsultaMapper;
 import br.com.cdb.agendadorDeConsultas.adapter.input.mapper.SecretariaMapper;
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaResponse;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
+import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
 import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
-import br.com.cdb.agendadorDeConsultas.core.usecase.validation.SecretariaValidator;
+import br.com.cdb.agendadorDeConsultas.core.usecase.ConsultaUseCase;
+import br.com.cdb.agendadorDeConsultas.factory.ConsultaFactoryBot;
 import br.com.cdb.agendadorDeConsultas.factory.SecretariaFactoryBot;
 import br.com.cdb.agendadorDeConsultas.port.input.SecretariaInputPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.UUID;
 
+import static br.com.cdb.agendadorDeConsultas.adapter.input.controller.ConsultaControllerTest.SECRETARIA_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,6 +47,12 @@ class SecretariaControllerTest {
 
     @MockitoBean
     private SecretariaMapper secretariaMapper;
+
+    @MockitoBean
+    private ConsultaMapper  consultaMapper;
+
+    @MockitoBean
+    private ConsultaUseCase consultaUseCase;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -143,6 +154,21 @@ class SecretariaControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar 404 Not Found ao tentar atualizar secretaria com ID que não existe")
+    void updateSecretaria_shouldReturnNotFound_whenIdDoesNotExist() throws Exception {
+        UUID idNaoExistente = UUID.randomUUID();
+        SecretariaUpdate request = SecretariaFactoryBot.buildUpdate();
+
+        when(secretariaInputPort.update(eq(idNaoExistente), any(SecretariaUpdate.class)))
+                .thenThrow(new EntityNotFoundException("Secretaria não encontrada"));
+
+        mockMvc.perform(put("/secretarias/{id}", idNaoExistente)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("Deve deletar uma secretaria com sucesso")
     void deleteSecretaria() throws Exception {
         UUID id = UUID.randomUUID();
@@ -152,5 +178,49 @@ class SecretariaControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(secretariaInputPort, times(1)).delete(id); // Verifica se o método delete foi chamado
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 Not Found ao tentar deletar secretaria com ID que não existe")
+    void deleteSecretaria_shouldReturnNotFound_whenIdDoesNotExist() throws Exception {
+        UUID idNaoExistente = UUID.randomUUID();
+
+        doThrow(new EntityNotFoundException("Secretaria não encontrada")).when(secretariaInputPort).delete(idNaoExistente);
+
+        mockMvc.perform(delete("/secretarias/{id}", idNaoExistente))
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    @DisplayName("Deve retornar 500 Internal Server Error para exceções inesperadas")
+    void createSecretaria_shouldReturnInternalServerError_whenUnexpectedError() throws Exception {
+        SecretariaRequest request = new SecretariaRequest("Nome", "123.456.789-00", "email@valido.com", "Senha@123");
+
+        when(secretariaMapper.toDomain(any(SecretariaRequest.class))).thenReturn(new Secretaria());
+        when(secretariaInputPort.create(any(Secretaria.class)))
+                .thenThrow(new RuntimeException("Erro inesperado"));
+
+        mockMvc.perform(post("/secretarias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError());
+    }
+
+
+
+    @Test
+    @DisplayName("Deve retornar 500 Internal Server Error para exceções inesperadas")
+    void create_shouldReturnInternalServerError_whenUnexpectedError() throws Exception {
+        ConsultaRequest request = ConsultaFactoryBot.buildRequest();
+
+        when(consultaMapper.toDomain(any(ConsultaRequest.class))).thenReturn(new Consulta());
+        when(consultaUseCase.createConsulta(eq(SECRETARIA_ID), any(Consulta.class)))
+                .thenThrow(new RuntimeException("Erro inesperado"));
+
+        mockMvc.perform(post("/consultas/{secretariaId}", SECRETARIA_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError());
     }
 }

@@ -4,6 +4,7 @@ import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaDetails;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaResponse;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
+import br.com.cdb.agendadorDeConsultas.adapter.output.entity.ConsultaEntity;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 
@@ -30,6 +31,20 @@ public class ConsultaFactoryBot {
         consulta.setStatus(StatusConsulta.AGENDADA);
         consulta.setSecretariaId(UUID.randomUUID());
         return consulta;
+    }
+
+    public static ConsultaEntity buildEntity() {
+        ConsultaEntity entity = new ConsultaEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setPatientName("John Doe (Entity)");
+        entity.setDoctorName("Dr. Who");
+        entity.setPatientNumber("987654321");
+        entity.setSpeciality("Ortopedia");
+        entity.setDescription("Consulta de retorno");
+        entity.setConsultationDateTime(LocalDateTime.now().plusDays(7));
+        entity.setStatus(StatusConsulta.AGENDADA);
+        entity.setSecretariaId(UUID.randomUUID());
+        return entity;
     }
 
     public static ConsultaUpdate buildUpdate() {

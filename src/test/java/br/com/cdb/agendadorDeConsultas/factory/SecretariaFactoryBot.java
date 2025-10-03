@@ -1,6 +1,8 @@
 package br.com.cdb.agendadorDeConsultas.factory;
 
+import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaRequest;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
+import br.com.cdb.agendadorDeConsultas.adapter.output.entity.SecretariaEntity;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
 
 import java.util.UUID;
@@ -10,16 +12,36 @@ public class SecretariaFactoryBot {
     public static Secretaria build() {
         Secretaria secretaria = new Secretaria();
         secretaria.setId(UUID.randomUUID());
-        secretaria.setName("Maria (Default)");
+        secretaria.setName("Maria Default");
         secretaria.setEmail("maria.default@email.com");
         secretaria.setPassword("rawPassword123");
         secretaria.setCpf("123.456.789-00");
         return secretaria;
     }
 
+    public static SecretariaRequest buildRequest() {
+        return new SecretariaRequest(
+                "Maria Request",
+                "maria.request@email.com",
+                "requestPassword123",
+                "111.222.333-44"
+        );
+    }
+
+    public static SecretariaEntity buildEntity() {
+        SecretariaEntity entity = new SecretariaEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setName("Maria Entity");
+        entity.setEmail("maria.entity@email.com");
+        entity.setPassword("entityPassword456");
+        entity.setCpf("555.666.777-88");
+        return entity;
+    }
+
+
     public static SecretariaUpdate buildUpdate() {
         return new SecretariaUpdate(
-                "Maria (Updated)",
+                "Maria Updated",
                 "maria.updated@email.com",
                 "newPassword456"
         );

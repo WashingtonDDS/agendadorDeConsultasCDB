@@ -2,7 +2,7 @@ package br.com.cdb.agendadorDeConsultas.core.usecase;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
-import br.com.cdb.agendadorDeConsultas.core.usecase.validation.ConsultaValidator;
+import br.com.cdb.agendadorDeConsultas.util.validation.ConsultaValidator;
 import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
