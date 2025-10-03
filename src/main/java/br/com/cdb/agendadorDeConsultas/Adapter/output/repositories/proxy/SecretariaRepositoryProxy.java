@@ -26,6 +26,13 @@ public class SecretariaRepositoryProxy implements SecretariaOutputPort {
         this.realRepository = realRepository;
     }
 
+    public void clearCache() {
+        logger.info("PROXY: Limpando todos os caches.");
+        cacheById.clear();
+        cacheByEmail.clear();
+        cacheByCpf.clear();
+    }
+
     @Override
     public Secretaria findById(UUID id) {
         if (cacheById.containsKey(id)) {
