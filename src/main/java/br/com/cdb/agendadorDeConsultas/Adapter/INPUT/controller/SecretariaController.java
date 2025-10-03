@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/secretarias")
-public class SecretariaController {
+public class SecretariaController implements SwaggerSecretariaController{
 
     private static final Logger logger = LoggerFactory.getLogger(SecretariaController.class);
 
