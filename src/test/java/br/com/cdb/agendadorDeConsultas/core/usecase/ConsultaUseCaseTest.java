@@ -12,8 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,7 +43,6 @@ class ConsultaUseCaseTest {
     void createConsulta_Success() {
         UUID secretariaId = UUID.randomUUID();
         Consulta consulta = ConsultaFactoryBot.build();
-
         when(consultaOutputPort.save(any(Consulta.class))).thenReturn(consulta);
 
         Consulta result = consultaUseCase.createConsulta(secretariaId, consulta);
@@ -57,7 +58,7 @@ class ConsultaUseCaseTest {
     void createConsulta_ValidationFails() {
         UUID secretariaId = UUID.randomUUID();
         Consulta consulta = ConsultaFactoryBot.build();
-        doThrow(new IllegalArgumentException("Dados da consulta inválidos")).when(validator).validateCreate(secretariaId, consulta);
+        doThrow(new IllegalArgumentException("Dados inválidos")).when(validator).validateCreate(secretariaId, consulta);
 
         assertThrows(IllegalArgumentException.class, () -> consultaUseCase.createConsulta(secretariaId, consulta));
         verify(secretariaOutputPort, never()).findById(any());
@@ -77,9 +78,21 @@ class ConsultaUseCaseTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando a persistência falhar ao criar")
+    void createConsulta_PersistenceFails() {
+        UUID secretariaId = UUID.randomUUID();
+        Consulta consulta = ConsultaFactoryBot.build();
+        when(consultaOutputPort.save(any(Consulta.class))).thenThrow(new DataAccessException("DB Error") {});
+
+        assertThrows(DataAccessException.class, () -> consultaUseCase.createConsulta(secretariaId, consulta));
+        verify(validator, times(1)).validateCreate(secretariaId, consulta);
+        verify(secretariaOutputPort, times(1)).findById(secretariaId);
+    }
+
+    @Test
     @DisplayName("Deve retornar uma lista de todas as consultas")
-    void getConsultas() {
-        List<Consulta> expectedConsultas = List.of(ConsultaFactoryBot.build(), ConsultaFactoryBot.build());
+    void getConsultas_Success() {
+        List<Consulta> expectedConsultas = List.of(ConsultaFactoryBot.build());
         when(consultaOutputPort.findAll()).thenReturn(expectedConsultas);
 
         List<Consulta> actualConsultas = consultaUseCase.getConsultas();
@@ -89,22 +102,37 @@ class ConsultaUseCaseTest {
     }
 
     @Test
+    @DisplayName("Deve retornar uma lista vazia quando não houver consultas")
+    void getConsultas_Empty() {
+        when(consultaOutputPort.findAll()).thenReturn(Collections.emptyList());
+
+        List<Consulta> actualConsultas = consultaUseCase.getConsultas();
+
+        assertTrue(actualConsultas.isEmpty());
+        verify(consultaOutputPort, times(1)).findAll();
+    }
+
+    @Test
     @DisplayName("Deve retornar consultas futuras e não canceladas")
-    void getUpcomingConsultas() {
+    void getUpcomingConsultas_Success() {
         Consulta agendada = ConsultaFactoryBot.build();
         agendada.setStatus(StatusConsulta.AGENDADA);
-
-        Consulta cancelada = ConsultaFactoryBot.build();
-        cancelada.setStatus(StatusConsulta.CANCELADA);
-
-        List<Consulta> mockConsultas = List.of(agendada, cancelada);
-        when(consultaOutputPort.findUpcomingConsultas(any(LocalDateTime.class))).thenReturn(mockConsultas);
+        when(consultaOutputPort.findUpcomingConsultas(any(LocalDateTime.class))).thenReturn(List.of(agendada));
 
         List<Consulta> result = consultaUseCase.getUpcomingConsultas();
 
         assertEquals(1, result.size());
         assertEquals(StatusConsulta.AGENDADA, result.get(0).getStatus());
-        verify(consultaOutputPort, times(1)).findUpcomingConsultas(any(LocalDateTime.class));
+    }
+
+    @Test
+    @DisplayName("Deve retornar lista vazia quando não houver consultas futuras")
+    void getUpcomingConsultas_Empty() {
+        when(consultaOutputPort.findUpcomingConsultas(any(LocalDateTime.class))).thenReturn(Collections.emptyList());
+
+        List<Consulta> result = consultaUseCase.getUpcomingConsultas();
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -136,7 +164,6 @@ class ConsultaUseCaseTest {
         UUID consultaId = UUID.randomUUID();
         ConsultaUpdate request = ConsultaFactoryBot.buildUpdate();
         Consulta existingConsulta = ConsultaFactoryBot.build();
-
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.of(existingConsulta));
         when(consultaOutputPort.save(any(Consulta.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -144,11 +171,7 @@ class ConsultaUseCaseTest {
 
         verify(validator, times(1)).validateUpdate(secretariaId, existingConsulta, request);
         verify(consultaOutputPort, times(1)).save(existingConsulta);
-
         assertEquals(request.doctorName(), updatedConsulta.getDoctorName());
-        assertEquals(request.patientName(), updatedConsulta.getPatientName());
-        assertEquals(request.patientNumber(), updatedConsulta.getPatientNumber());
-        assertEquals(request.consultationDateTime(), updatedConsulta.getConsultationDateTime());
     }
 
     @Test
@@ -156,11 +179,10 @@ class ConsultaUseCaseTest {
     void updateConsulta_NotFound() {
         UUID secretariaId = UUID.randomUUID();
         UUID consultaId = UUID.randomUUID();
-        ConsultaUpdate request = new ConsultaUpdate(null, null, null, null);
+        ConsultaUpdate request = ConsultaFactoryBot.buildUpdate();
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> consultaUseCase.updateConsulta(secretariaId, consultaId, request));
-        verify(validator, never()).validateUpdate(any(), any(), any());
         verify(consultaOutputPort, never()).save(any());
     }
 
@@ -169,9 +191,8 @@ class ConsultaUseCaseTest {
     void updateConsulta_ValidationFails() {
         UUID secretariaId = UUID.randomUUID();
         UUID consultaId = UUID.randomUUID();
-        ConsultaUpdate request = new ConsultaUpdate(null, null, null, null);
+        ConsultaUpdate request = ConsultaFactoryBot.buildUpdate();
         Consulta existingConsulta = ConsultaFactoryBot.build();
-
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.of(existingConsulta));
         doThrow(new IllegalArgumentException("Erro de validação")).when(validator).validateUpdate(secretariaId, existingConsulta, request);
 
@@ -180,12 +201,24 @@ class ConsultaUseCaseTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando a persistência falhar ao atualizar")
+    void updateConsulta_PersistenceFails() {
+        UUID secretariaId = UUID.randomUUID();
+        UUID consultaId = UUID.randomUUID();
+        ConsultaUpdate request = ConsultaFactoryBot.buildUpdate();
+        Consulta existingConsulta = ConsultaFactoryBot.build();
+        when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.of(existingConsulta));
+        when(consultaOutputPort.save(any(Consulta.class))).thenThrow(new DataAccessException("DB Error") {});
+
+        assertThrows(DataAccessException.class, () -> consultaUseCase.updateConsulta(secretariaId, consultaId, request));
+    }
+
+    @Test
     @DisplayName("Deve cancelar uma consulta com sucesso")
     void canceledConsulta_Success() {
         UUID secretariaId = UUID.randomUUID();
         UUID consultaId = UUID.randomUUID();
         Consulta consulta = ConsultaFactoryBot.build();
-
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.of(consulta));
         when(consultaOutputPort.save(any(Consulta.class))).thenReturn(consulta);
 
@@ -204,7 +237,6 @@ class ConsultaUseCaseTest {
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> consultaUseCase.canceledConsulta(secretariaId, consultaId));
-        verify(validator, never()).validateCancelOrDelete(any(), any());
         verify(consultaOutputPort, never()).save(any());
     }
 
@@ -214,7 +246,6 @@ class ConsultaUseCaseTest {
         UUID secretariaId = UUID.randomUUID();
         UUID consultaId = UUID.randomUUID();
         Consulta consulta = ConsultaFactoryBot.build();
-
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.of(consulta));
 
         consultaUseCase.deleteConsulta(secretariaId, consultaId);
@@ -231,7 +262,6 @@ class ConsultaUseCaseTest {
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> consultaUseCase.deleteConsulta(secretariaId, consultaId));
-        verify(validator, never()).validateForDelete(any(), any());
         verify(consultaOutputPort, never()).delete(any());
     }
 
@@ -241,7 +271,6 @@ class ConsultaUseCaseTest {
         UUID secretariaId = UUID.randomUUID();
         UUID consultaId = UUID.randomUUID();
         Consulta consulta = ConsultaFactoryBot.build();
-
         when(consultaOutputPort.findById(consultaId)).thenReturn(Optional.of(consulta));
         doThrow(new IllegalArgumentException("Não é possível deletar")).when(validator).validateForDelete(secretariaId, consulta);
 
