@@ -13,6 +13,7 @@ public class SecretariaFactoryBot {
         secretaria.setName("Maria (Default)");
         secretaria.setEmail("maria.default@email.com");
         secretaria.setPassword("rawPassword123");
+        secretaria.setCpf("123.456.789-00");
         return secretaria;
     }
 

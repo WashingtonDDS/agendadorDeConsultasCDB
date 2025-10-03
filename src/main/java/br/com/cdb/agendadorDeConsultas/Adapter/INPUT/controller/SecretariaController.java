@@ -21,16 +21,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/secretarias")
 public class SecretariaController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConsultaController.class);
+    private static final Logger logger = LoggerFactory.getLogger(SecretariaController.class);
 
     private final SecretariaInputPort secretariaInputPort;
 
-    private final SecretariaValidator validator;
 
     private final SecretariaMapper secretariaMapper;
 
-    public SecretariaController(SecretariaValidator validator, SecretariaMapper secretariaMapper, SecretariaInputPort secretariaInputPort) {
-        this.validator = validator;
+    public SecretariaController( SecretariaMapper secretariaMapper, SecretariaInputPort secretariaInputPort) {
+
         this.secretariaMapper = secretariaMapper;
         this.secretariaInputPort = secretariaInputPort;
     }
