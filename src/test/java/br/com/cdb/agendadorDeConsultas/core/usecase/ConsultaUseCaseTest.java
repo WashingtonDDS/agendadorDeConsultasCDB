@@ -10,8 +10,10 @@ import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 
@@ -36,6 +38,7 @@ class ConsultaUseCaseTest {
     @Mock
     ConsultaValidator validator;
 
+    @Spy
     @InjectMocks
     ConsultaUseCase consultaUseCase;
 
@@ -336,5 +339,48 @@ class ConsultaUseCaseTest {
 
         assertEquals(1, result.size());
         assertEquals(StatusConsulta.AGENDADA, result.get(0).getStatus());
+    }
+    @Test
+    @DisplayName("Deve criar uma consulta de retorno com sucesso")
+    void createFollowUpConsulta_Success() {
+        UUID secretariaId = UUID.randomUUID();
+        UUID originalConsultaId = UUID.randomUUID();
+        Consulta originalConsulta = ConsultaFactoryBot.build();
+        originalConsulta.setDescription("Check-up anual");
+        Consulta followupGerado = ConsultaFactoryBot.build();
+
+        when(consultaOutputPort.findById(originalConsultaId)).thenReturn(Optional.of(originalConsulta));
+        doReturn(followupGerado).when(consultaUseCase).createConsulta(eq(secretariaId), any(Consulta.class));
+
+        ArgumentCaptor<Consulta> consultaCaptor = ArgumentCaptor.forClass(Consulta.class);
+
+        Consulta result = consultaUseCase.createFollowUpConsulta(secretariaId, originalConsultaId);
+
+        assertNotNull(result);
+        assertEquals(followupGerado, result);
+
+        verify(consultaUseCase, times(1)).createConsulta(eq(secretariaId), consultaCaptor.capture());
+
+        Consulta consultaPassadaParaSalvar = consultaCaptor.getValue();
+        assertNull(consultaPassadaParaSalvar.getId());
+        assertEquals(StatusConsulta.AGENDADA, consultaPassadaParaSalvar.getStatus());
+        assertTrue(consultaPassadaParaSalvar.getDescription().startsWith("Consulta de Retorno"));
+        assertTrue(consultaPassadaParaSalvar.getDescription().contains(originalConsulta.getDescription()));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao criar retorno de consulta original inexistente")
+    void createFollowUpConsulta_OriginalNotFound() {
+        UUID secretariaId = UUID.randomUUID();
+        UUID originalConsultaId = UUID.randomUUID();
+
+        when(consultaOutputPort.findById(originalConsultaId)).thenReturn(Optional.empty());
+
+        BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class, () -> {
+            consultaUseCase.createFollowUpConsulta(secretariaId, originalConsultaId);
+        });
+
+        assertEquals("Consulta original não encontrada", exception.getMessage());
+        verify(consultaUseCase, never()).createConsulta(any(), any());
     }
 }
