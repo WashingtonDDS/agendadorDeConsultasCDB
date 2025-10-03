@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @RestController
 @RequestMapping("/consultas")
-public class ConsultaController {
+public class ConsultaController implements SwaggerConsultaController {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsultaController.class);
 
