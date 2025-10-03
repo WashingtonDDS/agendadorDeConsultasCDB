@@ -79,4 +79,16 @@ public interface SwaggerConsultaController {
             @ApiResponse(responseCode = "404", description = "Consulta não encontrada para o ID informado")
     })
     ResponseEntity<Void> deleteConsulta(@PathVariable UUID secretariaId, @PathVariable UUID id);
+
+    @PostMapping("/{secretariaId}/{originalConsultaId}/retorno")
+    @Operation(summary = "Agenda uma consulta de retorno", description = "Cria uma nova consulta baseada em uma consulta existente, ideal para retornos.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Consulta de retorno agendada com sucesso",
+                    content = @Content(schema = @Schema(implementation = ConsultaResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Consulta original ou secretaria não encontrada")
+    })
+    ResponseEntity<ConsultaResponse> createFollowUp(
+            @PathVariable UUID secretariaId,
+            @PathVariable UUID originalConsultaId
+    );
 }

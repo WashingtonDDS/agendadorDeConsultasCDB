@@ -117,4 +117,20 @@ public class ConsultaController implements SwaggerConsultaController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{secretariaId}/{originalConsultaId}/retorno")
+    @Override
+    public ResponseEntity<ConsultaResponse> createFollowUp(
+            @PathVariable UUID secretariaId,
+            @PathVariable UUID originalConsultaId) {
+
+        logger.info("Recebida requisição para criar consulta de retorno baseada na consulta ID: {} pela secretaria ID: {}",
+                originalConsultaId, secretariaId);
+
+        Consulta followUpConsulta = consultainputPort.createFollowUpConsulta(secretariaId, originalConsultaId);
+        ConsultaResponse response = consultaMapper.toResponse(followUpConsulta);
+
+        logger.debug("Consulta de retorno criada com ID: {}", followUpConsulta.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }
