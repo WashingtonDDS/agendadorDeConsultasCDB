@@ -238,4 +238,33 @@ class ConsultaControllerTest {
         mockMvc.perform(delete("/consultas/{secretariaId}/{id}", SECRETARIA_ID, idInexistente))
                 .andExpect(status().isNotFound());
     }
+    @Test
+    @DisplayName("Deve criar uma consulta de retorno com sucesso quando os IDs são válidos")
+    void createFollowUp_shouldCreateFollowUpConsulta_whenIdsAreValid() throws Exception {
+        UUID originalConsultaId = UUID.randomUUID();
+        Consulta followupConsulta = ConsultaFactoryBot.build();
+        ConsultaResponse response = ConsultaFactoryBot.buildResponse(followupConsulta);
+
+        when(consultaUseCase.createFollowUpConsulta(SECRETARIA_ID, originalConsultaId)).thenReturn(followupConsulta);
+        when(consultaMapper.toResponse(followupConsulta)).thenReturn(response);
+
+        mockMvc.perform(post("/consultas/{secretariaId}/{originalConsultaId}/retorno", SECRETARIA_ID, originalConsultaId))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(response.id().toString()))
+                .andExpect(jsonPath("$.patientName").value(response.patientName()));
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 Not Found ao tentar criar retorno de consulta original inexistente")
+    void createFollowUp_shouldReturnNotFound_whenOriginalConsultaDoesNotExist() throws Exception {
+        UUID originalConsultaId = UUID.randomUUID();
+        String errorMessage = "Consulta original não encontrada";
+
+        when(consultaUseCase.createFollowUpConsulta(SECRETARIA_ID, originalConsultaId))
+                .thenThrow(new EntityNotFoundException(errorMessage));
+
+        mockMvc.perform(post("/consultas/{secretariaId}/{originalConsultaId}/retorno", SECRETARIA_ID, originalConsultaId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(errorMessage));
+    }
 }
