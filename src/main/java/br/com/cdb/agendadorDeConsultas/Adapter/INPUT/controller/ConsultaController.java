@@ -10,15 +10,17 @@ import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @RestController
 @RequestMapping("/consultas")
-public class ConsultaController {
+public class ConsultaController implements SwaggerConsultaController {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsultaController.class);
 
@@ -40,7 +42,7 @@ public class ConsultaController {
         Consulta newConsulta = consultainputPort.createConsulta(secretariaId, consulta);
 
         logger.debug("Consulta criada com ID: {} para secretaria {}", newConsulta.getId(), secretariaId);
-        return ResponseEntity.ok(consultaMapper.toResponse(newConsulta));
+        return ResponseEntity.status(HttpStatus.CREATED).body(consultaMapper.toResponse(newConsulta));
     }
 
     @GetMapping
@@ -115,4 +117,20 @@ public class ConsultaController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{secretariaId}/{originalConsultaId}/retorno")
+    @Override
+    public ResponseEntity<ConsultaResponse> createFollowUp(
+            @PathVariable UUID secretariaId,
+            @PathVariable UUID originalConsultaId) {
+
+        logger.info("Recebida requisição para criar consulta de retorno baseada na consulta ID: {} pela secretaria ID: {}",
+                originalConsultaId, secretariaId);
+
+        Consulta followUpConsulta = consultainputPort.createFollowUpConsulta(secretariaId, originalConsultaId);
+        ConsultaResponse response = consultaMapper.toResponse(followUpConsulta);
+
+        logger.debug("Consulta de retorno criada com ID: {}", followUpConsulta.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }

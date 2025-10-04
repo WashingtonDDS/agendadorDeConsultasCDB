@@ -2,7 +2,8 @@ package br.com.cdb.agendadorDeConsultas.core.usecase;
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
-import br.com.cdb.agendadorDeConsultas.core.usecase.validation.ConsultaValidator;
+import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
+import br.com.cdb.agendadorDeConsultas.util.validation.ConsultaValidator;
 import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
@@ -92,6 +93,21 @@ public class ConsultaUseCase implements ConsultaInputPort {
         validator.validateForDelete(secretariaId, consulta);
 
         consultaOutputPort.delete(consulta);
+    }
+
+    @Override
+    public Consulta createFollowUpConsulta(UUID secretariaId, UUID originalConsultaId) {
+        Consulta originalConsulta = consultaOutputPort.findById(originalConsultaId)
+                .orElseThrow(() -> new BusinessRuleValidationException("Consulta original não encontrada"));
+
+            Consulta retorno = originalConsulta.clone();
+
+            retorno.setId(null);
+            retorno.setStatus(StatusConsulta.AGENDADA);
+            retorno.setDescription("Consulta de Retorno - " + originalConsulta.getDescription());
+            retorno.setConsultationDateTime(LocalDateTime.now().plusDays(15).withHour(10).withMinute(0));
+
+        return createConsulta(secretariaId, retorno);
     }
 
 

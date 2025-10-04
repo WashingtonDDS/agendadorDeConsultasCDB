@@ -1,4 +1,4 @@
-package br.com.cdb.agendadorDeConsultas.core.usecase.validation;
+package br.com.cdb.agendadorDeConsultas.util.validation;
 
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.ConsultaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Consulta;
@@ -6,14 +6,14 @@ import br.com.cdb.agendadorDeConsultas.core.domain.model.StatusConsulta;
 import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
-import org.springframework.stereotype.Component;
+
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Component
+
 public class ConsultaValidator {
     private final ConsultaOutputPort consultaOutputPort;
     private final SecretariaOutputPort secretariaOutputPort;
@@ -24,22 +24,26 @@ public class ConsultaValidator {
     }
 
     public void validateCreate(UUID secretariaId, Consulta consulta) {
+        if (consulta.getDoctorName() == null || consulta.getDoctorName().isBlank()) {
+            throw new BusinessRuleValidationException("O nome do médico não pode ser em branco.");
+        }
+        if (consulta.getPatientName() == null || consulta.getPatientName().isBlank()) {
+            throw new BusinessRuleValidationException("O nome do paciente não pode ser em branco.");
+        }
+        if (consulta.getPatientNumber() == null || !consulta.getPatientNumber().matches("[0-9]+")) {
+            throw new BusinessRuleValidationException("O número do paciente deve conter apenas dígitos.");
+        }
+
         checkSecretariaExists(secretariaId);
         checkConsultaIsInTheFuture(consulta.getConsultationDateTime());
         checkIsWithinBusinessHours(consulta.getConsultationDateTime());
-        checkDoctorAvailability(consulta.getDoctorName(), consulta.getConsultationDateTime(), null); // null pois não há consulta existente para ignorar
+        checkDoctorAvailability(consulta.getDoctorName(), consulta.getConsultationDateTime(), null);
     }
     public void validateUpdate(UUID secretariaId, Consulta consultaExistente, ConsultaUpdate request) {
         checkSecretariaExists(secretariaId);
         checkPermission(secretariaId, consultaExistente);
         checkCanBeModified(consultaExistente);
         validarCamposDoRequest(request, consultaExistente);
-
-        if (request.consultationDateTime() != null) {
-            checkConsultaIsInTheFuture(request.consultationDateTime());
-            checkIsWithinBusinessHours(request.consultationDateTime());
-            checkDoctorAvailability(consultaExistente.getDoctorName(), request.consultationDateTime(), consultaExistente.getId());
-        }
     }
     public void validateCancelOrDelete(UUID secretariaId, Consulta consulta) {
         checkSecretariaExists(secretariaId);

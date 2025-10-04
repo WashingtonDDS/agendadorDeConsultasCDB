@@ -2,7 +2,8 @@ package br.com.cdb.agendadorDeConsultas.core.usecase;
 
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
-import br.com.cdb.agendadorDeConsultas.core.usecase.validation.SecretariaValidator;
+import br.com.cdb.agendadorDeConsultas.core.exception.BusinessRuleValidationException;
+import br.com.cdb.agendadorDeConsultas.util.validation.SecretariaValidator;
 import br.com.cdb.agendadorDeConsultas.factory.SecretariaFactoryBot;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
 import org.junit.jupiter.api.DisplayName;
@@ -10,8 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,15 +40,18 @@ class SecretariaUseCaseTest {
     @DisplayName("Deve criar uma secretária com sucesso")
     void create_Success() {
         Secretaria secretaria = SecretariaFactoryBot.build();
-        when(passwordEncoder.encode(secretaria.getPassword())).thenReturn("encodedPassword");
+        String rawPassword = secretaria.getPassword();
+        String encodedPassword = "encodedPassword";
+
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
         when(secretariaOutputPort.save(any(Secretaria.class))).thenReturn(secretaria);
 
         Secretaria result = secretariaUseCase.create(secretaria);
 
         verify(validator, times(1)).validateCreate(secretaria);
-        verify(passwordEncoder, times(1)).encode(secretaria.getPassword());
+        verify(passwordEncoder, times(1)).encode(rawPassword);
         verify(secretariaOutputPort, times(1)).save(secretaria);
-        assertEquals("encodedPassword", result.getPassword());
+        assertEquals(encodedPassword, result.getPassword());
     }
 
     @Test
@@ -60,6 +66,19 @@ class SecretariaUseCaseTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção quando a persistência falhar ao criar")
+    void create_PersistenceFails() {
+        Secretaria secretaria = SecretariaFactoryBot.build();
+        when(passwordEncoder.encode(secretaria.getPassword())).thenReturn("rawPassword123");
+        when(secretariaOutputPort.save(any(Secretaria.class))).thenThrow(new DataAccessException("DB Error") {});
+
+        assertThrows(DataAccessException.class, () -> secretariaUseCase.create(secretaria));
+
+        verify(validator, times(1)).validateCreate(secretaria);
+        verify(passwordEncoder, times(1)).encode(secretaria.getPassword());
+    }
+
+    @Test
     @DisplayName("Deve retornar todas as secretárias")
     void findAll_Success() {
         List<Secretaria> expectedList = List.of(SecretariaFactoryBot.build(), SecretariaFactoryBot.build());
@@ -68,6 +87,17 @@ class SecretariaUseCaseTest {
         List<Secretaria> result = secretariaUseCase.findAll();
 
         assertEquals(expectedList, result);
+        verify(secretariaOutputPort, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("Deve retornar lista vazia quando não houver secretárias")
+    void findAll_Empty() {
+        when(secretariaOutputPort.findAll()).thenReturn(Collections.emptyList());
+
+        List<Secretaria> result = secretariaUseCase.findAll();
+
+        assertTrue(result.isEmpty());
         verify(secretariaOutputPort, times(1)).findAll();
     }
 
@@ -114,6 +144,19 @@ class SecretariaUseCaseTest {
 
         assertThrows(RuntimeException.class, () -> secretariaUseCase.delete(id));
         verify(secretariaOutputPort, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando a persistência falhar ao deletar")
+    void delete_PersistenceFails() {
+        UUID id = UUID.randomUUID();
+        Secretaria secretaria = SecretariaFactoryBot.build();
+        when(secretariaOutputPort.findById(id)).thenReturn(secretaria);
+        doThrow(new DataAccessException("DB Error") {}).when(secretariaOutputPort).delete(secretaria);
+
+        assertThrows(DataAccessException.class, () -> secretariaUseCase.delete(id));
+
+        verify(secretariaOutputPort, times(1)).findById(id);
     }
 
     @Test
@@ -165,5 +208,60 @@ class SecretariaUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> secretariaUseCase.update(id, updateRequest));
         verify(passwordEncoder, never()).encode(anyString());
         verify(secretariaOutputPort, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando a persistência falhar ao atualizar")
+    void update_PersistenceFails() {
+        UUID id = UUID.randomUUID();
+        SecretariaUpdate updateRequest = SecretariaFactoryBot.buildUpdate();
+        Secretaria existingSecretaria = SecretariaFactoryBot.build();
+
+        when(secretariaOutputPort.findById(id)).thenReturn(existingSecretaria);
+        when(passwordEncoder.encode(updateRequest.password())).thenReturn("encodedNewPassword");
+        when(secretariaOutputPort.save(any(Secretaria.class))).thenThrow(new DataAccessException("DB Error") {});
+
+        assertThrows(DataAccessException.class, () -> secretariaUseCase.update(id, updateRequest));
+
+        verify(validator, times(1)).validateUpdate(existingSecretaria, updateRequest);
+        verify(passwordEncoder, times(1)).encode(updateRequest.password());
+    }
+ 
+
+    @Test
+    @DisplayName("Deve lançar exceção quando validator lançar BusinessRuleValidationException")
+    void create_ShouldThrowBusinessRuleValidationException() {
+        Secretaria secretaria = SecretariaFactoryBot.build();
+
+        doThrow(new BusinessRuleValidationException("Regra de negócio violada"))
+                .when(validator).validateCreate(secretaria);
+
+        assertThrows(BusinessRuleValidationException.class,
+                () -> secretariaUseCase.create(secretaria));
+    }
+
+    @Test
+    @DisplayName("Deve propagar exceção ao buscar por ID quando ocorrer erro inesperado")
+    void findById_ShouldPropagateUnexpectedError() {
+        UUID id = UUID.randomUUID();
+        when(secretariaOutputPort.findById(id))
+                .thenThrow(new RuntimeException("Erro inesperado"));
+
+        assertThrows(RuntimeException.class, () -> secretariaUseCase.findById(id));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar atualizar com dados inválidos do validator")
+    void update_ShouldThrowBusinessRuleValidationException() {
+        UUID id = UUID.randomUUID();
+        SecretariaUpdate updateRequest = SecretariaFactoryBot.buildUpdate();
+        Secretaria existingSecretaria = SecretariaFactoryBot.build();
+
+        when(secretariaOutputPort.findById(id)).thenReturn(existingSecretaria);
+        doThrow(new BusinessRuleValidationException("Dados inválidos"))
+                .when(validator).validateUpdate(existingSecretaria, updateRequest);
+
+        assertThrows(BusinessRuleValidationException.class,
+                () -> secretariaUseCase.update(id, updateRequest));
     }
 }

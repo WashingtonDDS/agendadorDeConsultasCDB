@@ -14,4 +14,5 @@ public interface ConsultaInputPort {
     public Consulta updateConsulta( UUID secretariaId,UUID id, ConsultaUpdate request);
     public Consulta canceledConsulta(UUID secretariaId,UUID id);
     public void deleteConsulta(UUID secretariaId,UUID id);
+    public Consulta createFollowUpConsulta(UUID secretariaId, UUID originalConsultaId);
 }

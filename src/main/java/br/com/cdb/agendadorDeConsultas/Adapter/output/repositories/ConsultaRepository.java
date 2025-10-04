@@ -27,7 +27,7 @@ public class ConsultaRepository implements ConsultaOutputPort {
 
     private final ConsultaMapper consultaMapper;
 
-    private final RowMapper<Consulta> consultaRowMapper = (rs, rowNum) -> {
+    final RowMapper<Consulta> consultaRowMapper = (rs, rowNum) -> {
         Consulta consulta = new Consulta();
         consulta.setId(UUID.fromString(rs.getString("id")));
         consulta.setDoctorName(rs.getString("doctorname"));
@@ -45,6 +45,9 @@ public class ConsultaRepository implements ConsultaOutputPort {
         this.consultaMapper = consultaMapper;
     }
 
+    RowMapper<Consulta> getConsultaRowMapper() {
+        return this.consultaRowMapper;
+    }
 
     @Override
     public Consulta save(Consulta consulta) {
@@ -119,6 +122,10 @@ public class ConsultaRepository implements ConsultaOutputPort {
     }
 
     public void delete(Consulta consulta) {
+        if (consulta == null || consulta.getId() == null) {
+            logger.warn("Tentativa de deletar consulta com objeto ou ID nulo.");
+            throw new IllegalArgumentException("Consulta ou ID da consulta não pode ser nulo para deleção.");
+        }
         logger.info("Deletando consulta com id {}", consulta.getId());
 
         String sql = "call pr_delete_consulta(?)";

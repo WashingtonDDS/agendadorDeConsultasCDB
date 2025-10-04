@@ -2,7 +2,7 @@ package br.com.cdb.agendadorDeConsultas.core.usecase;
 
 import br.com.cdb.agendadorDeConsultas.adapter.input.request.SecretariaUpdate;
 import br.com.cdb.agendadorDeConsultas.core.domain.model.Secretaria;
-import br.com.cdb.agendadorDeConsultas.core.usecase.validation.SecretariaValidator;
+import br.com.cdb.agendadorDeConsultas.util.validation.SecretariaValidator;
 import br.com.cdb.agendadorDeConsultas.port.input.SecretariaInputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
 import org.springframework.security.crypto.password.PasswordEncoder;

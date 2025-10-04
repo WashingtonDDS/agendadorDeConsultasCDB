@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 
-public class Consulta {
+public class Consulta implements Cloneable {
 
     private UUID id;
 
@@ -114,5 +114,14 @@ public class Consulta {
 
     public void setConsultationDateTime(LocalDateTime consultationDateTime) {
         this.consultationDateTime = consultationDateTime;
+    }
+
+    @Override
+    public Consulta clone() {
+        try {
+            return (Consulta) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }
