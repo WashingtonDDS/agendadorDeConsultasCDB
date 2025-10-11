@@ -73,9 +73,9 @@ public class SecretariaRepositoryProxy implements SecretariaOutputPort {
 
     @Override
     public Secretaria save(Secretaria secretaria) {
-
-        invalidateAllCaches(secretaria);
-        return realRepository.save(secretaria);
+        Secretaria savedSecretaria = realRepository.save(secretaria);
+        invalidateAllCaches(savedSecretaria);
+        return savedSecretaria;
     }
 
     @Override
@@ -92,18 +92,32 @@ public class SecretariaRepositoryProxy implements SecretariaOutputPort {
 
 
     private void updateAllCaches(Secretaria secretaria) {
-        logger.debug("PROXY: Atualizando todos os caches para a secretaria {}", secretaria.getId());
-        cacheById.put(secretaria.getId(), secretaria);
-        cacheByEmail.put(secretaria.getEmail(), secretaria);
-        cacheByCpf.put(secretaria.getCpf(), secretaria);
+        if (secretaria != null) {
+            logger.debug("PROXY: Atualizando todos os caches para a secretaria {}", secretaria.getId());
+            if (secretaria.getId() != null) {
+                cacheById.put(secretaria.getId(), secretaria);
+            }
+            if (secretaria.getEmail() != null) {
+                cacheByEmail.put(secretaria.getEmail(), secretaria);
+            }
+            if (secretaria.getCpf() != null) {
+                cacheByCpf.put(secretaria.getCpf(), secretaria);
+            }
+        }
     }
 
     private void invalidateAllCaches(Secretaria secretaria) {
         if (secretaria != null) {
             logger.info("PROXY: Invalidando todos os caches para a secretaria {}", secretaria.getId());
-            cacheById.remove(secretaria.getId());
-            cacheByEmail.remove(secretaria.getEmail());
-            cacheByCpf.remove(secretaria.getCpf());
+            if (secretaria.getId() != null) {
+                cacheById.remove(secretaria.getId());
+            }
+            if (secretaria.getEmail() != null) {
+                cacheByEmail.remove(secretaria.getEmail());
+            }
+            if (secretaria.getCpf() != null) {
+                cacheByCpf.remove(secretaria.getCpf());
+            }
         }
     }
 }

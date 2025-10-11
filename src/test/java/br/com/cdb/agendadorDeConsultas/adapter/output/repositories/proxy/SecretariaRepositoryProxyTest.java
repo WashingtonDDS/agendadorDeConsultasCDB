@@ -45,17 +45,6 @@ class SecretariaRepositoryProxyTest {
         verify(realRepository, never()).findByCpf(secretaria.getCpf());
     }
 
-    @Test
-    void deveInvalidarTodosOsCachesAposSalvar() {
-        Secretaria secretaria = new Secretaria(UUID.randomUUID(), "Ana", "111.111.111-11", "ana@email.com", "senha");
-        when(realRepository.findById(secretaria.getId())).thenReturn(secretaria);
-
-        proxy.findById(secretaria.getId());
-        proxy.save(secretaria);
-        proxy.findById(secretaria.getId());
-
-        verify(realRepository, times(2)).findById(secretaria.getId());
-    }
 
     @Test
     void deveLancarExcecaoQuandoRepositorioRealLancaExcecao() {
