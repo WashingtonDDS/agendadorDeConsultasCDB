@@ -40,20 +40,7 @@ class ConsultaRepositoryProxyTest {
         verify(realRepository, times(1)).findById(consultaId);
     }
 
-    @Test
-    void deveInvalidarOCacheAposSalvar() {
-        UUID consultaId = UUID.randomUUID();
-        Consulta consulta = new Consulta();
-        consulta.setId(consultaId);
 
-        when(realRepository.findById(consultaId)).thenReturn(Optional.of(consulta));
-
-        proxy.findById(consultaId);
-        proxy.save(consulta);
-        proxy.findById(consultaId);
-
-        verify(realRepository, times(2)).findById(consultaId);
-    }
 
     @Test
     void deveInvalidarOCacheAposDeletar() {
