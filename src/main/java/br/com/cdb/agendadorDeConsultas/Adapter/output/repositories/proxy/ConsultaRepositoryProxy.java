@@ -38,15 +38,20 @@ public class ConsultaRepositoryProxy implements ConsultaOutputPort {
 
     @Override
     public Consulta save(Consulta consulta) {
-        logger.info("PROXY: Invalidando cache para a consulta {}.", consulta.getId());
-        cache.remove(consulta.getId());
-        return realRepository.save(consulta);
+        Consulta savedConsulta = realRepository.save(consulta);
+        if (savedConsulta != null && savedConsulta.getId() != null) {
+            logger.info("PROXY: Invalidando cache para a consulta {}.", savedConsulta.getId());
+            cache.remove(savedConsulta.getId());
+        }
+        return savedConsulta;
     }
 
     @Override
     public void delete(Consulta consulta) {
-        logger.info("PROXY: Invalidando cache para a consulta {}.", consulta.getId());
-        cache.remove(consulta.getId());
+        if (consulta != null && consulta.getId() != null) {
+            logger.info("PROXY: Invalidando cache para a consulta {}.", consulta.getId());
+            cache.remove(consulta.getId());
+        }
         realRepository.delete(consulta);
     }
 

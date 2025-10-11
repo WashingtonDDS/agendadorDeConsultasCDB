@@ -8,6 +8,7 @@ import br.com.cdb.agendadorDeConsultas.port.input.ConsultaInputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.ConsultaOutputPort;
 import br.com.cdb.agendadorDeConsultas.port.output.SecretariaOutputPort;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -100,15 +101,26 @@ public class ConsultaUseCase implements ConsultaInputPort {
         Consulta originalConsulta = consultaOutputPort.findById(originalConsultaId)
                 .orElseThrow(() -> new BusinessRuleValidationException("Consulta original não encontrada"));
 
-            Consulta retorno = originalConsulta.clone();
+        Consulta retorno = originalConsulta.clone();
 
-            retorno.setId(null);
-            retorno.setStatus(StatusConsulta.AGENDADA);
-            retorno.setDescription("Consulta de Retorno - " + originalConsulta.getDescription());
-            retorno.setConsultationDateTime(LocalDateTime.now().plusDays(15).withHour(10).withMinute(0));
+        retorno.setId(null);
+        retorno.setStatus(StatusConsulta.AGENDADA);
+        retorno.setDescription("Consulta de Retorno - " + originalConsulta.getDescription());
+
+        LocalDateTime data = LocalDateTime.now().plusDays(15).withHour(10).withMinute(0);
+        DayOfWeek dia = data.getDayOfWeek();
+
+        if (dia == DayOfWeek.SATURDAY) {
+            data = data.plusDays(2);
+        } else if (dia == DayOfWeek.SUNDAY) {
+            data = data.plusDays(1);
+        }
+
+        retorno.setConsultationDateTime(data);
 
         return createConsulta(secretariaId, retorno);
     }
+
 
 
 }
